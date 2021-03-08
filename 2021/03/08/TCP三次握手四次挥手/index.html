@@ -23,28 +23,37 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"www.xulixuli.ltd","root":"/","images":"/images","scheme":"Pisces","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
-<meta property="og:type" content="website">
-<meta property="og:title" content="阿旭的博客">
-<meta property="og:url" content="http://www.xulixuli.ltd/index.html">
+<meta name="description" content="前置知识​        IP协议工作在网络层，是计算机与计算机之间的通信，IP协议通过IP地址识别不同的计算机；TCP协议工作在传输层，是应用程序与应用程序之间的通信，TCP协议通过端口号来识别同一台计算机上的不同程序，所示使用TCP协议提供传输服务，必须指明端口号。  IP地址 + 端口号 &#x3D; socket套接字  TCP协议的学习，最基本需要掌握以下知识：  TCP报文结构 建立连接 断开连">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TCP三次握手四次挥手">
+<meta property="og:url" content="http://www.xulixuli.ltd/2021/03/08/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/index.html">
 <meta property="og:site_name" content="阿旭的博客">
+<meta property="og:description" content="前置知识​        IP协议工作在网络层，是计算机与计算机之间的通信，IP协议通过IP地址识别不同的计算机；TCP协议工作在传输层，是应用程序与应用程序之间的通信，TCP协议通过端口号来识别同一台计算机上的不同程序，所示使用TCP协议提供传输服务，必须指明端口号。  IP地址 + 端口号 &#x3D; socket套接字  TCP协议的学习，最基本需要掌握以下知识：  TCP报文结构 建立连接 断开连">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="c:/Users/Liu/AppData/Roaming/Typora/typora-user-images/image-20210308154528632.png">
+<meta property="og:image" content="file:///C:/Users/Liu/AppData/Local/Temp/msohtmlclip1/01/clip_image001.png">
+<meta property="og:image" content="file:///C:/Users/Liu/AppData/Local/Temp/msohtmlclip1/01/clip_image001.png">
+<meta property="article:published_time" content="2021-03-08T07:10:29.000Z">
+<meta property="article:modified_time" content="2021-03-08T08:10:59.976Z">
 <meta property="article:author" content="aaaXu">
+<meta property="article:tag" content="计算机网络 传输层 TCP链接">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="c:/Users/Liu/AppData/Roaming/Typora/typora-user-images/image-20210308154528632.png">
 
 
-<link rel="canonical" href="http://www.xulixuli.ltd/">
+<link rel="canonical" href="http://www.xulixuli.ltd/2021/03/08/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/">
 
 
 <script class="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
-<title>阿旭的博客</title>
+<title>TCP三次握手四次挥手 | 阿旭的博客</title>
   
 
 
@@ -130,7 +139,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -143,6 +152,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text">前置知识</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TCP%E6%8A%A5%E6%96%87%E7%BB%93%E6%9E%84"><span class="nav-number"></span> <span class="nav-text">TCP报文结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="nav-number"></span> <span class="nav-text">TCP三次握手</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%87%E7%A8%8B%E5%88%86%E8%A7%A3%EF%BC%9A"><span class="nav-number">0.0.0.1.</span> <span class="nav-text">过程分解：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BB%86%E8%8A%82%EF%BC%9A"><span class="nav-number">0.0.0.2.</span> <span class="nav-text">细节：</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B"><span class="nav-number">1.</span> <span class="nav-text">四次挥手</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B%E5%B0%8F%E7%BB%93"><span class="nav-number">1.0.0.1.</span> <span class="nav-text">四次挥手小结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%81%B5%E9%AD%82%E6%8B%B7%E9%97%AE"><span class="nav-number">1.1.</span> <span class="nav-text">灵魂拷问</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E3%80%90%E9%97%AE%E9%A2%981%E3%80%91%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%9E%E6%8E%A5%E7%9A%84%E6%97%B6%E5%80%99%E6%98%AF%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%EF%BC%8C%E5%85%B3%E9%97%AD%E7%9A%84%E6%97%B6%E5%80%99%E5%8D%B4%E6%98%AF%E5%9B%9B%E6%AC%A1%E6%8F%A1%E6%89%8B%EF%BC%9F"><span class="nav-number">1.1.0.1.</span> <span class="nav-text">【问题1】为什么连接的时候是三次握手，关闭的时候却是四次握手？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E3%80%90%E9%97%AE%E9%A2%982%E3%80%91%E4%B8%BA%E4%BB%80%E4%B9%88TIME-WAIT%E7%8A%B6%E6%80%81%E9%9C%80%E8%A6%81%E7%BB%8F%E8%BF%872MSL-%E6%9C%80%E5%A4%A7%E6%8A%A5%E6%96%87%E6%AE%B5%E7%94%9F%E5%AD%98%E6%97%B6%E9%97%B4-%E6%89%8D%E8%83%BD%E8%BF%94%E5%9B%9E%E5%88%B0CLOSE%E7%8A%B6%E6%80%81%EF%BC%9F"><span class="nav-number">1.1.0.2.</span> <span class="nav-text">【问题2】为什么TIME_WAIT状态需要经过2MSL(最大报文段生存时间)才能返回到CLOSE状态？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E3%80%90%E9%97%AE%E9%A2%98%EF%BC%93%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E7%AC%AC%E5%9B%9B%E6%AC%A1%E5%BA%94%E7%AD%94ACK%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E3%80%91"><span class="nav-number">1.1.0.3.</span> <span class="nav-text">【问题３：为什么需要第四次应答ＡＣＫ，而不是】</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B%E5%B0%B1%E5%85%88%E8%AE%B2%E5%AE%8C%E4%BA%86%EF%BC%8C%E5%89%A9%E4%B8%8B%E7%9A%84%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93%E3%80%81%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6%E3%80%81%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6%EF%BC%8C%E4%B8%8B%E4%B8%80%E7%AF%87%E5%86%8D%E8%AE%B2"><span class="nav-number">1.1.0.3.1.</span> <span class="nav-text">三次握手四次挥手就先讲完了，剩下的可靠传输、流量控制、拥塞控制，下一篇再讲</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -188,16 +198,17 @@
 </noscript>
 
 
-    <div class="main-inner index posts-expand">
+    <div class="main-inner post posts-expand">
 
-    
+
+  
 
 
 <div class="post-block">
   
   
 
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://www.xulixuli.ltd/2021/03/08/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -210,9 +221,9 @@
       <meta itemprop="name" content="阿旭的博客">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/03/08/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/" class="post-title-link" itemprop="url">TCP三次握手四次挥手</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          TCP三次握手四次挥手
+        </h1>
 
         <div class="post-meta-container">
           <div class="post-meta">
@@ -236,7 +247,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><p>​        IP协议工作在网络层，是计算机与计算机之间的通信，IP协议通过IP地址识别不同的计算机；TCP协议工作在传输层，是应用程序与应用程序之间的通信，TCP协议通过端口号来识别同一台计算机上的不同程序，所示使用TCP协议提供传输服务，必须指明端口号。</p>
+        <h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><p>​        IP协议工作在网络层，是计算机与计算机之间的通信，IP协议通过IP地址识别不同的计算机；TCP协议工作在传输层，是应用程序与应用程序之间的通信，TCP协议通过端口号来识别同一台计算机上的不同程序，所示使用TCP协议提供传输服务，必须指明端口号。</p>
 <blockquote>
 <p>IP地址 + 端口号 = socket套接字</p>
 </blockquote>
@@ -319,7 +330,6 @@
 <p>王道计网 <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV19E411D78Q?from=search&amp;seid=708856387005307241">https://www.bilibili.com/video/BV19E411D78Q?from=search&amp;seid=708856387005307241</a></p>
 </blockquote>
 
-      
     </div>
 
     
@@ -327,75 +337,25 @@
     
 
     <footer class="post-footer">
-        <div class="post-eof"></div>
-      
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E4%BC%A0%E8%BE%93%E5%B1%82-TCP%E9%93%BE%E6%8E%A5/" rel="tag"># 计算机网络 传输层 TCP链接</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" rel="prev" title="我的第一篇博客">
+                  <i class="fa fa-chevron-left"></i> 我的第一篇博客
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
     </footer>
   </article>
 </div>
 
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://www.xulixuli.ltd/2021/03/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="aaaXu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="阿旭的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/03/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" class="post-title-link" itemprop="url">我的第一篇博客</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-03-08 11:54:37 / 修改时间：15:11:22" itemprop="dateCreated datePublished" datetime="2021-03-08T11:54:37+08:00">2021-03-08</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="无论如何，很高兴认识你！小ZX呆龟！"><a href="#无论如何，很高兴认识你！小ZX呆龟！" class="headerlink" title="无论如何，很高兴认识你！小ZX呆龟！"></a>无论如何，很高兴认识你！小ZX呆龟！</h1>
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
 
 
 
