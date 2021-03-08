@@ -21,12 +21,12 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"www.xulixuli.ltd","root":"/","images":"/images","scheme":"Pisces","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+    var CONFIG = {"hostname":"aaaxu.github.io","root":"/","images":"/images","scheme":"Pisces","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
 <meta name="description" content="前置知识​        IP协议工作在网络层，是计算机与计算机之间的通信，IP协议通过IP地址识别不同的计算机；TCP协议工作在传输层，是应用程序与应用程序之间的通信，TCP协议通过端口号来识别同一台计算机上的不同程序，所示使用TCP协议提供传输服务，必须指明端口号。  IP地址 + 端口号 &#x3D; socket套接字  TCP协议的学习，最基本需要掌握以下知识：  TCP报文结构 建立连接 断开连">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TCP三次握手四次挥手">
-<meta property="og:url" content="http://www.xulixuli.ltd/2021/03/08/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/index.html">
+<meta property="og:url" content="https://aaaxu.github.io/2021/03/08/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/index.html">
 <meta property="og:site_name" content="阿旭的博客">
 <meta property="og:description" content="前置知识​        IP协议工作在网络层，是计算机与计算机之间的通信，IP协议通过IP地址识别不同的计算机；TCP协议工作在传输层，是应用程序与应用程序之间的通信，TCP协议通过端口号来识别同一台计算机上的不同程序，所示使用TCP协议提供传输服务，必须指明端口号。  IP地址 + 端口号 &#x3D; socket套接字  TCP协议的学习，最基本需要掌握以下知识：  TCP报文结构 建立连接 断开连">
 <meta property="og:locale" content="zh_CN">
@@ -41,7 +41,7 @@
 <meta name="twitter:image" content="https://i.loli.net/2021/03/08/e71wTXKx25kajLo.png">
 
 
-<link rel="canonical" href="http://www.xulixuli.ltd/2021/03/08/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/">
+<link rel="canonical" href="https://aaaxu.github.io/2021/03/08/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/">
 
 
 <script class="page-configurations">
@@ -114,6 +114,7 @@
       <h1 class="site-title">阿旭的博客</h1>
       <i class="logo-line"></i>
     </a>
+      <p class="site-subtitle" itemprop="description">Good Good Study,Day Day Up</p>
   </div>
 
   <div class="site-nav-right">
@@ -159,7 +160,7 @@
         <div class="site-overview-wrap sidebar-panel">
           <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
   <p class="site-author-name" itemprop="name">aaaXu</p>
-  <div class="site-description" itemprop="description"></div>
+  <div class="site-description" itemprop="description">知识荒原</div>
 </div>
 <div class="site-state-wrap site-overview-item animated">
   <nav class="site-state">
@@ -209,12 +210,12 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://www.xulixuli.ltd/2021/03/08/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/">
+    <link itemprop="mainEntityOfPage" href="https://aaaxu.github.io/2021/03/08/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
       <meta itemprop="name" content="aaaXu">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content="知识荒原">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
