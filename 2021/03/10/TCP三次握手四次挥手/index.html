@@ -25,24 +25,23 @@
   </script>
 <meta name="description" content="前置知识​        IP协议工作在网络层，是计算机与计算机之间的通信，IP协议通过IP地址识别不同的计算机；TCP协议工作在传输层，是应用程序与应用程序之间的通信">
 <meta property="og:type" content="article">
-<meta property="og:title" content="TCP三次握手四次挥手">
-<meta property="og:url" content="https://www.xulixuli.ltd/2021/03/08/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/index.html">
+<meta property="og:title" content="深入理解TCP三次握手技术内幕">
+<meta property="og:url" content="https://www.xulixuli.ltd/2021/03/10/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/index.html">
 <meta property="og:site_name" content="阿旭的博客">
 <meta property="og:description" content="前置知识​        IP协议工作在网络层，是计算机与计算机之间的通信，IP协议通过IP地址识别不同的计算机；TCP协议工作在传输层，是应用程序与应用程序之间的通信">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://i.loli.net/2021/03/08/e71wTXKx25kajLo.png">
 <meta property="og:image" content="c:/Users/Liu/AppData/Roaming/Typora/typora-user-images/image-20210308162307530.png">
 <meta property="og:image" content="https://i.loli.net/2021/03/08/g1GCxOBtlIMHfPT.png">
-<meta property="article:published_time" content="2021-03-08T07:10:29.000Z">
-<meta property="article:modified_time" content="2021-03-08T13:50:08.642Z">
+<meta property="article:published_time" content="2021-03-10T07:10:29.000Z">
+<meta property="article:modified_time" content="2021-07-02T04:08:00.749Z">
 <meta property="article:author" content="aaaXu">
-<meta property="article:tag" content="TCP">
-<meta property="article:tag" content="传输层">
+<meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://i.loli.net/2021/03/08/e71wTXKx25kajLo.png">
 
 
-<link rel="canonical" href="https://www.xulixuli.ltd/2021/03/08/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/">
+<link rel="canonical" href="https://www.xulixuli.ltd/2021/03/10/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/">
 
 
 <script class="page-configurations">
@@ -54,7 +53,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>TCP三次握手四次挥手 | 阿旭的博客</title>
+<title>深入理解TCP三次握手技术内幕 | 阿旭的博客</title>
   
 
   <script>
@@ -143,8 +142,8 @@
         <li class="menu-item menu-item-我"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>我</a></li>
         <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
         <li class="menu-item menu-item-文章"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>文章</a></li>
-        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a></li>
-        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">3</span></a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">1</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">2</span></a></li>
         <li class="menu-item menu-item-交大の猫"><a href="/miaomiao/" rel="section"><i class="fas fa-cat fa-fw"></i>交大の猫</a></li>
   </ul>
 </nav>
@@ -191,20 +190,20 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-count">2</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-count">1</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -254,7 +253,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://www.xulixuli.ltd/2021/03/08/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/">
+    <link itemprop="mainEntityOfPage" href="https://www.xulixuli.ltd/2021/03/10/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/touxiang.jpg">
@@ -267,7 +266,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          TCP三次握手四次挥手
+          深入理解TCP三次握手技术内幕
         </h1>
 
         <div class="post-meta-container">
@@ -277,21 +276,23 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2021-03-08 15:10:29 / 修改时间：21:50:08" itemprop="dateCreated datePublished" datetime="2021-03-08T15:10:29+08:00">2021-03-08</time>
+      <time title="创建时间：2021-03-10 15:10:29" itemprop="dateCreated datePublished" datetime="2021-03-10T15:10:29+08:00">2021-03-10</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-02 12:08:00" itemprop="dateModified" datetime="2021-07-02T12:08:00+08:00">2021-07-02</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">计算机基础</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
         </span>
     </span>
 
@@ -401,7 +402,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://www.xulixuli.ltd/2021/03/08/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/" title="TCP三次握手四次挥手">https://www.xulixuli.ltd/2021/03/08/TCP三次握手四次挥手/</a>
+      <a href="https://www.xulixuli.ltd/2021/03/10/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/" title="深入理解TCP三次握手技术内幕">https://www.xulixuli.ltd/2021/03/10/TCP三次握手四次挥手/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -426,15 +427,14 @@
   </div>
 </div>
 
-          <div class="post-tags">
-              <a href="/tags/TCP/" rel="tag"><i class="fa fa-tag"></i> TCP</a>
-              <a href="/tags/%E4%BC%A0%E8%BE%93%E5%B1%82/" rel="tag"><i class="fa fa-tag"></i> 传输层</a>
-          </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
+                <a href="/2021/07/02/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/" rel="prev" title="深入理解观察者模式技术内幕">
+                  <i class="fa fa-chevron-left"></i> 深入理解观察者模式技术内幕
+                </a>
             </div>
             <div class="post-nav-item">
                 <a href="/2021/03/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" rel="next" title="我的第一篇博客">
