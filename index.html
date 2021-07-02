@@ -182,13 +182,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">5</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-count">4</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
   </nav>
@@ -288,6 +288,169 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/07/02/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://www.xulixuli.ltd/2021/03/15/jvm%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%BF%87%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+      <meta itemprop="name" content="aaaXu">
+      <meta itemprop="description" content="知识荒原">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="阿旭的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/03/15/jvm%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%BF%87%E7%A8%8B/" class="post-title-link" itemprop="url">JVM对象内存布局</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-15 20:03:35" itemprop="dateCreated datePublished" datetime="2021-03-15T20:03:35+08:00">2021-03-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><strong>引言：</strong>创建对象在语言层面只是一个ｎｅｗ关键字。但是在虚拟机的内部却要做很多的操作，比如在堆中分配内存、设置对象头等等。本文简要介绍了java对象在内存中的布局以及对象的创建。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/15/jvm%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%BF%87%E7%A8%8B/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://www.xulixuli.ltd/2021/03/10/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+      <meta itemprop="name" content="aaaXu">
+      <meta itemprop="description" content="知识荒原">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="阿旭的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/03/10/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/" class="post-title-link" itemprop="url">JVM运行时数据区</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-10 19:36:47" itemprop="dateCreated datePublished" datetime="2021-03-10T19:36:47+08:00">2021-03-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://imgtu.com/i/RceR2t"><img src="https://z3.ax1x.com/2021/07/02/RceR2t.md.jpg" alt="RceR2t.md.jpg"></a></p>
+<p><strong>摘要：</strong>要想学习JVM，首先需要了解JVM的运行时的内存布局。本文介绍了JVM运行时内存数据区，包括程序计数器、虚拟机栈、本地方法栈、堆、方法区的概念。</p>
+<p><strong>关键词：</strong>JVM  虚拟机  运行时数据区 </p>
+<h2 id="博主的建议"><a href="#博主的建议" class="headerlink" title="博主的建议"></a>博主的建议</h2><p>纵然JVM运行时数据区对学习ｊｖｍ很重要，但是初学者在对JVM没有整体的认识的情况下，直接学习这部分内容会学的一头雾水，也很难真正理解这部分内容。比如 “方法区存放类型信息、常量” 这句话，如果读者不了解class文件的结构，可能不太能区分class文件中的常量池与jvm运行时常量池的区别。所以我建议，第一遍学习先粗读，等学习完整个ｊｖｍ的知识，再回来学习第二遍，会对第一遍学习的内容有更深刻的理解。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/10/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
