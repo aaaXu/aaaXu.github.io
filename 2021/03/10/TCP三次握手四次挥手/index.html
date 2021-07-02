@@ -21,24 +21,25 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"www.xulixuli.ltd","root":"/","images":"/images","scheme":"Pisces","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+    var CONFIG = {"hostname":"www.xulixuli.ltd","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
-<meta name="description" content="前置知识​        IP协议工作在网络层，是计算机与计算机之间的通信，IP协议通过IP地址识别不同的计算机；TCP协议工作在传输层，是应用程序与应用程序之间的通信">
+<meta name="description" content="摘要：本文介绍了TCP报文结构、TCP三次握手、四次挥手的机制。传输控制协议（TCP，Transmission Control Protocol）是一种面向连接的、可靠的、基于字节流的传输层通信协议。TCP是面向连接的，无论哪一方向另一方发送数据之前，都必须先在双方之间建立一条连接。在TCP&#x2F;IP协议中，TCP协议提供可靠的连接服务，连接是通过三次握手进行初始化的。三次握手的目的是同步连接双方的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="深入理解TCP三次握手技术内幕">
+<meta property="og:title" content="深入理解【TCP三次握手】技术内幕">
 <meta property="og:url" content="https://www.xulixuli.ltd/2021/03/10/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/index.html">
 <meta property="og:site_name" content="阿旭的博客">
-<meta property="og:description" content="前置知识​        IP协议工作在网络层，是计算机与计算机之间的通信，IP协议通过IP地址识别不同的计算机；TCP协议工作在传输层，是应用程序与应用程序之间的通信">
+<meta property="og:description" content="摘要：本文介绍了TCP报文结构、TCP三次握手、四次挥手的机制。传输控制协议（TCP，Transmission Control Protocol）是一种面向连接的、可靠的、基于字节流的传输层通信协议。TCP是面向连接的，无论哪一方向另一方发送数据之前，都必须先在双方之间建立一条连接。在TCP&#x2F;IP协议中，TCP协议提供可靠的连接服务，连接是通过三次握手进行初始化的。三次握手的目的是同步连接双方的">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://z3.ax1x.com/2021/07/02/RceWxP.md.jpg">
 <meta property="og:image" content="https://i.loli.net/2021/03/08/e71wTXKx25kajLo.png">
 <meta property="og:image" content="c:/Users/Liu/AppData/Roaming/Typora/typora-user-images/image-20210308162307530.png">
 <meta property="og:image" content="https://i.loli.net/2021/03/08/g1GCxOBtlIMHfPT.png">
 <meta property="article:published_time" content="2021-03-10T07:10:29.000Z">
-<meta property="article:modified_time" content="2021-07-02T04:08:00.749Z">
+<meta property="article:modified_time" content="2021-07-02T09:50:03.257Z">
 <meta property="article:author" content="aaaXu">
 <meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://i.loli.net/2021/03/08/e71wTXKx25kajLo.png">
+<meta name="twitter:image" content="https://z3.ax1x.com/2021/07/02/RceWxP.md.jpg">
 
 
 <link rel="canonical" href="https://www.xulixuli.ltd/2021/03/10/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/">
@@ -53,7 +54,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>深入理解TCP三次握手技术内幕 | 阿旭的博客</title>
+<title>深入理解【TCP三次握手】技术内幕 | 阿旭的博客</title>
   
 
   <script>
@@ -139,12 +140,11 @@
 
 <nav class="site-nav">
   <ul class="main-menu menu">
-        <li class="menu-item menu-item-我"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>我</a></li>
         <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
-        <li class="menu-item menu-item-文章"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>文章</a></li>
-        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">1</span></a></li>
-        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">2</span></a></li>
+        <li class="menu-item menu-item-所有文章"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>所有文章</a></li>
+        <li class="menu-item menu-item-文章分类"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类</a></li>
         <li class="menu-item menu-item-交大の猫"><a href="/miaomiao/" rel="section"><i class="fas fa-cat fa-fw"></i>交大の猫</a></li>
+        <li class="menu-item menu-item-关于博主"><a href="/aboutme/" rel="section"><i class="fa fa-user fa-fw"></i>关于博主</a></li>
   </ul>
 </nav>
 
@@ -175,7 +175,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text">前置知识</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TCP%E6%8A%A5%E6%96%87%E7%BB%93%E6%9E%84"><span class="nav-number"></span> <span class="nav-text">TCP报文结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="nav-number"></span> <span class="nav-text">TCP三次握手</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%87%E7%A8%8B%E5%88%86%E8%A7%A3%EF%BC%9A"><span class="nav-number">0.0.0.1.</span> <span class="nav-text">过程分解：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BB%86%E8%8A%82%EF%BC%9A"><span class="nav-number">0.0.0.2.</span> <span class="nav-text">细节：</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B"><span class="nav-number">1.</span> <span class="nav-text">四次挥手</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B%E5%B0%8F%E7%BB%93"><span class="nav-number">1.0.0.1.</span> <span class="nav-text">四次挥手小结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%81%B5%E9%AD%82%E6%8B%B7%E9%97%AE"><span class="nav-number">1.1.</span> <span class="nav-text">灵魂拷问</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E3%80%90%E9%97%AE%E9%A2%981%E3%80%91%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%9E%E6%8E%A5%E7%9A%84%E6%97%B6%E5%80%99%E6%98%AF%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%EF%BC%8C%E5%85%B3%E9%97%AD%E7%9A%84%E6%97%B6%E5%80%99%E5%8D%B4%E6%98%AF%E5%9B%9B%E6%AC%A1%E6%8F%A1%E6%89%8B%EF%BC%9F"><span class="nav-number">1.1.0.1.</span> <span class="nav-text">【问题1】为什么连接的时候是三次握手，关闭的时候却是四次握手？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E3%80%90%E9%97%AE%E9%A2%982%E3%80%91%E4%B8%BA%E4%BB%80%E4%B9%88TIME-WAIT%E7%8A%B6%E6%80%81%E9%9C%80%E8%A6%81%E7%BB%8F%E8%BF%872MSL-%E6%9C%80%E5%A4%A7%E6%8A%A5%E6%96%87%E6%AE%B5%E7%94%9F%E5%AD%98%E6%97%B6%E9%97%B4-%E6%89%8D%E8%83%BD%E8%BF%94%E5%9B%9E%E5%88%B0CLOSE%E7%8A%B6%E6%80%81%EF%BC%9F"><span class="nav-number">1.1.0.2.</span> <span class="nav-text">【问题2】为什么TIME_WAIT状态需要经过2MSL(最大报文段生存时间)才能返回到CLOSE状态？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E3%80%90%E9%97%AE%E9%A2%98%EF%BC%93%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E7%AC%AC%E5%9B%9B%E6%AC%A1%E5%BA%94%E7%AD%94ACK%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E3%80%91"><span class="nav-number">1.1.0.3.</span> <span class="nav-text">【问题３：为什么需要第四次应答ＡＣＫ，而不是】</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B%E5%B0%B1%E5%85%88%E8%AE%B2%E5%AE%8C%E4%BA%86%EF%BC%8C%E5%89%A9%E4%B8%8B%E7%9A%84%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93%E3%80%81%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6%E3%80%81%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6%EF%BC%8C%E4%B8%8B%E4%B8%80%E7%AF%87%E5%86%8D%E8%AE%B2"><span class="nav-number">1.1.0.3.1.</span> <span class="nav-text">三次握手四次挥手就先讲完了，剩下的可靠传输、流量控制、拥塞控制，下一篇再讲</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text">前置知识</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP%E6%8A%A5%E6%96%87%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">TCP报文结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="nav-number">3.</span> <span class="nav-text">TCP三次握手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B"><span class="nav-number">4.</span> <span class="nav-text">TCP四次挥手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%81%B5%E9%AD%82%E6%8B%B7%E9%97%AE"><span class="nav-number">5.</span> <span class="nav-text">灵魂拷问</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -196,15 +196,8 @@
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-          
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-          
-        <span class="site-state-item-count">1</span>
-        <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
 </div>
@@ -266,7 +259,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          深入理解TCP三次握手技术内幕
+          深入理解【TCP三次握手】技术内幕
         </h1>
 
         <div class="post-meta-container">
@@ -279,13 +272,6 @@
 
       <time title="创建时间：2021-03-10 15:10:29" itemprop="dateCreated datePublished" datetime="2021-03-10T15:10:29+08:00">2021-03-10</time>
     </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-02 12:08:00" itemprop="dateModified" datetime="2021-07-02T12:08:00+08:00">2021-07-02</time>
-      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -306,7 +292,14 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><p>​        IP协议工作在网络层，是计算机与计算机之间的通信，IP协议通过IP地址识别不同的计算机；TCP协议工作在传输层，是应用程序与应用程序之间的通信<span id="more"></span>，TCP协议通过端口号来识别同一台计算机上的不同程序，所示使用TCP协议提供传输服务，必须指明端口号。</p>
+        <p><a target="_blank" rel="noopener" href="https://imgtu.com/i/RceWxP"><img src="https://z3.ax1x.com/2021/07/02/RceWxP.md.jpg" alt="RceWxP.md.jpg"></a></p>
+<p><strong>摘要</strong>：本文介绍了TCP报文结构、TCP三次握手、四次挥手的机制。传输控制协议（TCP，Transmission Control Protocol）是一种面向连接的、可靠的、基于字节流的传输层通信协议。TCP是面向连接的，无论哪一方向另一方发送数据之前，都必须先在双方之间建立一条连接。在TCP/IP协议中，TCP协议提供可靠的连接服务，连接是通过三次握手进行初始化的。三次握手的目的是同步连接双方的序列号和确认号并交换 TCP窗口大小信息。</p>
+<p><strong>关键词：</strong>TCP报文 三次握手 四次挥手 计算机网络</p>
+<span id="more"></span>
+
+
+
+<h3 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h3><p>​        IP协议工作在网络层，是计算机与计算机之间的通信，IP协议通过IP地址识别不同的计算机；TCP协议工作在传输层，是应用程序与应用程序之间的通信，TCP协议通过端口号来识别同一台计算机上的不同程序，所示使用TCP协议提供传输服务，必须指明端口号。</p>
 <blockquote>
 <p>IP地址 + 端口号 = socket套接字</p>
 </blockquote>
@@ -319,9 +312,9 @@
 <li>拥塞控制</li>
 </ul>
 <p>下面就一一介绍以上知识点。</p>
-<h1 id="TCP报文结构"><a href="#TCP报文结构" class="headerlink" title="TCP报文结构"></a>TCP报文结构</h1><p><img src="https://i.loli.net/2021/03/08/e71wTXKx25kajLo.png" alt="报文结构.png"></p>
+<h3 id="TCP报文结构"><a href="#TCP报文结构" class="headerlink" title="TCP报文结构"></a>TCP报文结构</h3><p><img src="https://i.loli.net/2021/03/08/e71wTXKx25kajLo.png" alt="报文结构.png"></p>
 <p>三次握手和四次挥手阶段，主要应该关心的是序号seq，确认号，标志位ACK、FIN。</p>
-<h1 id="TCP三次握手"><a href="#TCP三次握手" class="headerlink" title="TCP三次握手"></a>TCP三次握手</h1><blockquote>
+<h3 id="TCP三次握手"><a href="#TCP三次握手" class="headerlink" title="TCP三次握手"></a>TCP三次握手</h3><blockquote>
 <p>客户端的疑惑：服务端能不能收到我的信息？（客户端发出去一个信息，并且收到服务端回复，才能确定服务端能收到自己的信息）</p>
 </blockquote>
 <blockquote>
@@ -329,7 +322,8 @@
 </blockquote>
 <p><strong>解决上面的疑惑就需要三次握手：</strong></p>
 <p><img src="C:\Users\Liu\AppData\Roaming\Typora\typora-user-images\image-20210308162307530.png" alt="image-20210308162307530"></p>
-<h5 id="过程分解："><a href="#过程分解：" class="headerlink" title="过程分解："></a>过程分解：</h5><p><strong>第一次握手</strong>：客户端请求建立连接（<code>syn = 1</code>），并<strong>随机</strong>生成序号<code>seq</code>，这里假定10000，这个序号一会儿用于服务器确认。</p>
+<p>过程分解：</p>
+<p><strong>第一次握手</strong>：客户端请求建立连接（<code>syn = 1</code>），并<strong>随机</strong>生成序号<code>seq</code>，这里假定10000，这个序号一会儿用于服务器确认。</p>
 <p><strong>第二次握手</strong>：这时候服务器需要做，并且做了两件事：</p>
 <ol>
 <li>一个是给客户端确认自己能收到，一个是服务器不知道客户端能不能收到自己的信息，它要问问。对于第一件事，服务器确认信息的做法是： <code>ACK = 1</code>，表示这次要确认一下上次你发的东西。确认什么呢，确认的就是第一次客户端发来的序号<code>seq</code>，确认的方法就是将客户端发来的<code>seq + 1</code>，然后弄到【确认序号】这个数据域。<code>ACK</code>标志位为 1 表示接收到这个TCP报文之后需要看一下 【确认序号】数据域。客户端接收以后，看见<code>ACK</code>是1，就去看seq，发现是自己第一次发的建立连接的请求的<code>seq</code> 又加了 1 ，就能确定得到正确的回复了。</li>
@@ -349,7 +343,8 @@
 <p>由于服务器上一次发了 <code>Syn = 1，seq = 20000</code> ，正等着客户端应答呢，这时它收到一个客户端发来的</p>
 <p><code>ACK = 1， seq = 20001</code> ，服务器就知道客户端能收到自己的请求了。于是服务器也开心了。</p>
 <p>至此，他们俩一开始的困惑都解决了，互相向对方发送了试探信号，也都收到了应答，就可以开始通信了。</p>
-<h5 id="细节："><a href="#细节：" class="headerlink" title="细节："></a>细节：</h5><ul>
+<p><strong>细节：</strong></p>
+<ul>
 <li><p>用于试探的消息是： <code>SYN = 1</code> ，再带一个随机的序号 <code>seq</code> </p>
 </li>
 <li><p>用于答复对方的试探的消息是： <code>ACK = 1</code> ，再加一个 【确认序号ａｃｋ】，确认序号的值是对方的试探的<code>seq + 1</code>.试探就是请求建立连接。</p>
@@ -359,7 +354,7 @@
 <li><p> 第二次握手，服务器一下子做了两件事：又确认，又试探。</p>
 </li>
 </ul>
-<h2 id="四次挥手"><a href="#四次挥手" class="headerlink" title="四次挥手"></a>四次挥手</h2><p>就像请求建立连接一定要　<code>ｓｙｎ＝１</code>，断开连接一定要<code>Ｆｉｎ＝１</code>.</p>
+<h3 id="TCP四次挥手"><a href="#TCP四次挥手" class="headerlink" title="TCP四次挥手"></a>TCP四次挥手</h3><p>就像请求建立连接一定要　<code>ｓｙｎ＝１</code>，断开连接一定要<code>Ｆｉｎ＝１</code>.</p>
 <p>过程和上面一样，接收到了ＦＩＮ以后，也要给对方一个<code>ＡＣＫ　＝　１，ａｃｋ＝　ｓｅｑ＋１</code>.应答。</p>
 <p>注意这里的<code>ｓｅｑ</code>就不是随机的了，而是在通信中一路增长下来的。</p>
 <p><img src="https://i.loli.net/2021/03/08/g1GCxOBtlIMHfPT.png" alt="图片.png"></p>
@@ -368,22 +363,26 @@
 <p>客户端收到服务端的<code>ＡＣＫ</code>之后，不会立即断开，它也知道服务端可能还会发数据过来，所以等。直到收到服务端的<code>ＦＩＮ</code>之后，客户端做个<code>ＡＣＫ</code>应答之后，客户端才会真的关闭连接。</p>
 <p>而服务端在第二次给客户端发　<code>ＡＣＫ</code>　以及第三次给客户端发<code>ＦＩＮ</code>之间的时间里，可能还会给客户端发一些没干完的活儿。等服务端的活都干完了，才给客户端发<code>ＦＩＮ</code>告诉客户端自己不会再发消息了。</p>
 <p>这就是为什么第二次和第三次不合并，因为服务器可能还有未发完的数据。</p>
-<h5 id="四次挥手小结"><a href="#四次挥手小结" class="headerlink" title="四次挥手小结"></a>四次挥手小结</h5><ol>
+<p><strong>四次挥手小结</strong></p>
+<ol>
 <li><p>客户端的ＦＩＮ只是通知对方“自己不会再发数据了”，并不能直接断开连接，因为不知道服务器还有没有消息，还要等服务端的ＦＩＮ，才确定服务器该发过来的都发了。</p>
 </li>
 <li><p>为什么服务器给客户端发完ＦＩＮ，不用等客户端的ＦＩＮ？因为客户端第一次就发了ＦＩＮ，服务器已经知道客户端不会再有请求了。</p>
 </li>
 </ol>
-<h3 id="灵魂拷问"><a href="#灵魂拷问" class="headerlink" title="灵魂拷问"></a>灵魂拷问</h3><hr>
-<h5 id="【问题1】为什么连接的时候是三次握手，关闭的时候却是四次握手？"><a href="#【问题1】为什么连接的时候是三次握手，关闭的时候却是四次握手？" class="headerlink" title="【问题1】为什么连接的时候是三次握手，关闭的时候却是四次握手？"></a>【问题1】为什么连接的时候是三次握手，关闭的时候却是四次握手？</h5><p>答：因为当Server端收到Client端的SYN连接请求报文后，可以直接发送SYN+ACK报文。其中ACK报文是用来应答的，SYN报文是用来同步的。但是关闭连接时，当Server端收到FIN报文时，很可能并不会立即关闭SOCKET，所以只能先回复一个ACK报文，告诉Client端，”你发的FIN报文我收到了”。只有等到我Server端所有的报文都发送完了，我才能发送FIN报文，因此不能一起发送。故需要四步握手。</p>
-<h5 id="【问题2】为什么TIME-WAIT状态需要经过2MSL-最大报文段生存时间-才能返回到CLOSE状态？"><a href="#【问题2】为什么TIME-WAIT状态需要经过2MSL-最大报文段生存时间-才能返回到CLOSE状态？" class="headerlink" title="【问题2】为什么TIME_WAIT状态需要经过2MSL(最大报文段生存时间)才能返回到CLOSE状态？"></a>【问题2】为什么TIME_WAIT状态需要经过2MSL(最大报文段生存时间)才能返回到CLOSE状态？</h5><p>答：虽然按道理，四个报文都发送完毕，我们可以直接进入CLOSE状态了，但是我们必须假象网络是不可靠的，有可以最后一个ACK丢失。所以TIME_WAIT状态就是用来重发可能丢失的ACK报文。</p>
-<h5 id="【问题３：为什么需要第四次应答ACK，而不是】"><a href="#【问题３：为什么需要第四次应答ACK，而不是】" class="headerlink" title="【问题３：为什么需要第四次应答ＡＣＫ，而不是】"></a>【问题３：为什么需要第四次应答ＡＣＫ，而不是】</h5><p>注意，由于网络不可靠，每一步的数据包都可能丢失。比如挥手，第三次挥手，服务器给客户端发送ＦＩＮ，丢了，客户端就总也关闭不了，因为客户端只有等到服务器的ＦＩＮ才会关闭。服务器不知道自己的ＦＩＮ人家有没有收到，所以需要客户端返回一个ＡＣＫ说收到了。如果第三次之后，服务端没收到ＡＣＫ，很可能就是ＦＩＮ丢了，所以会再给客户端发一次ＦＩＮ。第四次应答就是告诉服务器，刚才你的ＦＩＮ没丢，我准备关闭了。</p>
+<h3 id="灵魂拷问"><a href="#灵魂拷问" class="headerlink" title="灵魂拷问"></a>灵魂拷问</h3><p><strong>【问题1】为什么连接的时候是三次握手，关闭的时候却是四次握手？</strong></p>
+<p>答：因为当Server端收到Client端的SYN连接请求报文后，可以直接发送SYN+ACK报文。其中ACK报文是用来应答的，SYN报文是用来同步的。但是关闭连接时，当Server端收到FIN报文时，很可能并不会立即关闭SOCKET，所以只能先回复一个ACK报文，告诉Client端，”你发的FIN报文我收到了”。只有等到我Server端所有的报文都发送完了，我才能发送FIN报文，因此不能一起发送。故需要四步握手。</p>
+<p><strong>【问题2】为什么TIME_WAIT状态需要经过2MSL(最大报文段生存时间)才能返回到CLOSE状态？</strong></p>
+<p>答：虽然按道理，四个报文都发送完毕，我们可以直接进入CLOSE状态了，但是我们必须假象网络是不可靠的，有可以最后一个ACK丢失。所以TIME_WAIT状态就是用来重发可能丢失的ACK报文。</p>
+<p><strong>【问题３：为什么需要第四次应答ＡＣＫ，而不是】</strong></p>
+<p>注意，由于网络不可靠，每一步的数据包都可能丢失。比如挥手，第三次挥手，服务器给客户端发送ＦＩＮ，丢了，客户端就总也关闭不了，因为客户端只有等到服务器的ＦＩＮ才会关闭。服务器不知道自己的ＦＩＮ人家有没有收到，所以需要客户端返回一个ＡＣＫ说收到了。如果第三次之后，服务端没收到ＡＣＫ，很可能就是ＦＩＮ丢了，所以会再给客户端发一次ＦＩＮ。第四次应答就是告诉服务器，刚才你的ＦＩＮ没丢，我准备关闭了。</p>
 <p>但是第四次发送的ＡＣＫ也可能丢，若是ＡＣＫ丢了，服务器发完ＦＩＮ之后迟迟收不到应答，就以为ＦＩＮ也丢了，会再次发送ＦＩＮ。所以第四次的ＡＣＫ之后客户端还要ＴＩＭＥＷＡＩＴ才能关闭，因为它怕服务端由于ＡＣＫ丢失，再发个ＦＩＮ过来。如果第四次之后客户端直接关闭，ＡＣＫ还丢了，服务器就一直给客户端发ＦＩＮ，服务器无法关闭连接。</p>
-<h6 id="三次握手四次挥手就先讲完了，剩下的可靠传输、流量控制、拥塞控制，下一篇再讲"><a href="#三次握手四次挥手就先讲完了，剩下的可靠传输、流量控制、拥塞控制，下一篇再讲" class="headerlink" title="三次握手四次挥手就先讲完了，剩下的可靠传输、流量控制、拥塞控制，下一篇再讲"></a>三次握手四次挥手就先讲完了，剩下的可靠传输、流量控制、拥塞控制，下一篇再讲</h6><hr>
-<blockquote>
+<p>三次握手四次挥手就先讲完了，剩下的可靠传输、流量控制、拥塞控制，下一篇再讲</p>
+<hr>
 <p>参考：</p>
+<blockquote>
 <p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/8c5ccbe51f5b">https://www.jianshu.com/p/8c5ccbe51f5b</a></p>
-<p>王道计网 <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV19E411D78Q?from=search&amp;seid=708856387005307241">https://www.bilibili.com/video/BV19E411D78Q?from=search&amp;seid=708856387005307241</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV19E411D78Q?from=search&amp;seid=708856387005307241">https://www.bilibili.com/video/BV19E411D78Q?from=search&amp;seid=708856387005307241</a></p>
 </blockquote>
 
     </div>
@@ -402,7 +401,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://www.xulixuli.ltd/2021/03/10/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/" title="深入理解TCP三次握手技术内幕">https://www.xulixuli.ltd/2021/03/10/TCP三次握手四次挥手/</a>
+      <a href="https://www.xulixuli.ltd/2021/03/10/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/" title="深入理解【TCP三次握手】技术内幕">https://www.xulixuli.ltd/2021/03/10/TCP三次握手四次挥手/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -432,8 +431,8 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/07/02/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/" rel="prev" title="深入理解观察者模式技术内幕">
-                  <i class="fa fa-chevron-left"></i> 深入理解观察者模式技术内幕
+                <a href="/2021/07/02/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/" rel="prev" title="深入理解【观察者模式】技术内幕">
+                  <i class="fa fa-chevron-left"></i> 深入理解【观察者模式】技术内幕
                 </a>
             </div>
             <div class="post-nav-item">

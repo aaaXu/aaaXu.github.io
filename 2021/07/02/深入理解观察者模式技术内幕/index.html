@@ -21,20 +21,22 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"www.xulixuli.ltd","root":"/","images":"/images","scheme":"Pisces","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+    var CONFIG = {"hostname":"www.xulixuli.ltd","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
-<meta name="description" content="知识荒原">
+<meta name="description" content="摘要：见名知意，介绍设计模式中的观察者模式。大黑镇楼。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="深入理解观察者模式技术内幕">
+<meta property="og:title" content="深入理解【观察者模式】技术内幕">
 <meta property="og:url" content="https://www.xulixuli.ltd/2021/07/02/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/index.html">
 <meta property="og:site_name" content="阿旭的博客">
-<meta property="og:description" content="知识荒原">
+<meta property="og:description" content="摘要：见名知意，介绍设计模式中的观察者模式。大黑镇楼。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://z3.ax1x.com/2021/07/02/RcuLRA.md.jpg">
 <meta property="article:published_time" content="2021-07-02T04:06:04.000Z">
-<meta property="article:modified_time" content="2021-07-02T04:06:04.891Z">
+<meta property="article:modified_time" content="2021-07-02T09:37:17.970Z">
 <meta property="article:author" content="aaaXu">
 <meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://z3.ax1x.com/2021/07/02/RcuLRA.md.jpg">
 
 
 <link rel="canonical" href="https://www.xulixuli.ltd/2021/07/02/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/">
@@ -49,7 +51,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>深入理解观察者模式技术内幕 | 阿旭的博客</title>
+<title>深入理解【观察者模式】技术内幕 | 阿旭的博客</title>
   
 
   <script>
@@ -135,12 +137,11 @@
 
 <nav class="site-nav">
   <ul class="main-menu menu">
-        <li class="menu-item menu-item-我"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>我</a></li>
         <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
-        <li class="menu-item menu-item-文章"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>文章</a></li>
-        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">1</span></a></li>
-        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">2</span></a></li>
+        <li class="menu-item menu-item-所有文章"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>所有文章</a></li>
+        <li class="menu-item menu-item-文章分类"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类</a></li>
         <li class="menu-item menu-item-交大の猫"><a href="/miaomiao/" rel="section"><i class="fas fa-cat fa-fw"></i>交大の猫</a></li>
+        <li class="menu-item menu-item-关于博主"><a href="/aboutme/" rel="section"><i class="fa fa-user fa-fw"></i>关于博主</a></li>
   </ul>
 </nav>
 
@@ -191,15 +192,8 @@
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-          
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-          
-        <span class="site-state-item-count">1</span>
-        <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
 </div>
@@ -261,7 +255,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          深入理解观察者模式技术内幕
+          深入理解【观察者模式】技术内幕
         </h1>
 
         <div class="post-meta-container">
@@ -274,6 +268,15 @@
 
       <time title="创建时间：2021-07-02 12:06:04" itemprop="dateCreated datePublished" datetime="2021-07-02T12:06:04+08:00">2021-07-02</time>
     </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+        </span>
+    </span>
 
   
 </div>
@@ -285,7 +288,9 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        
+        <p><a target="_blank" rel="noopener" href="https://imgtu.com/i/RcuLRA"><img src="https://z3.ax1x.com/2021/07/02/RcuLRA.md.jpg" alt="RcuLRA.md.jpg"></a></p>
+<p><strong>摘要：</strong>见名知意，介绍设计模式中的观察者模式。大黑镇楼。<span id="more"></span></p>
+
     </div>
 
     
@@ -302,7 +307,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://www.xulixuli.ltd/2021/07/02/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/" title="深入理解观察者模式技术内幕">https://www.xulixuli.ltd/2021/07/02/深入理解观察者模式技术内幕/</a>
+      <a href="https://www.xulixuli.ltd/2021/07/02/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/" title="深入理解【观察者模式】技术内幕">https://www.xulixuli.ltd/2021/07/02/深入理解观察者模式技术内幕/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -334,8 +339,8 @@
             <div class="post-nav-item">
             </div>
             <div class="post-nav-item">
-                <a href="/2021/03/10/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/" rel="next" title="深入理解TCP三次握手技术内幕">
-                  深入理解TCP三次握手技术内幕 <i class="fa fa-chevron-right"></i>
+                <a href="/2021/03/10/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/" rel="next" title="深入理解【TCP三次握手】技术内幕">
+                  深入理解【TCP三次握手】技术内幕 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
