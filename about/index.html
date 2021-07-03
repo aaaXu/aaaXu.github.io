@@ -179,7 +179,7 @@
     <img class="site-author-image" itemprop="image" alt="aaaXu"
       src="/images/touxiang.jpg">
   <p class="site-author-name" itemprop="name">aaaXu</p>
-  <div class="site-description" itemprop="description">知识荒原</div>
+  <div class="site-description" itemprop="description">学海无涯</div>
 </div>
 <div class="site-state-wrap site-overview-item animated">
   <nav class="site-state">
@@ -200,9 +200,6 @@
       <span class="links-of-author-item">
         <a href="https://github.com/aaaxu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;aaaxu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
       </span>
-  </div>
-  <div class="cc-license site-overview-item animated" itemprop="license">
-    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
   </div>
 
 
@@ -265,6 +262,7 @@
     
 
 
+    <div class="comments" id="SOHUCS"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -324,6 +322,18 @@
 
 
 
+
+  <script>
+  NexT.utils.loadComments('#SOHUCS', () => {
+    NexT.utils.getScript('https://changyan.sohu.com/upload/changyan.js', () => {
+      window.changyan.api.config({
+        appid: 'cyvxm2pbi',
+        conf : 'prod_739bcda75a20596e51a2964edde3b31b'
+      });
+    });
+  });
+  </script>
+  <script src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
 
 </body>
 </html>
