@@ -235,7 +235,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://www.xulixuli.ltd/2021/07/02/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/">
+    <link itemprop="mainEntityOfPage" href="https://www.xulixuli.ltd/2021/07/02/%E9%87%8D%E5%86%99equals%E4%B8%8EhashCode/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/touxiang.jpg">
@@ -248,7 +248,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/07/02/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/" class="post-title-link" itemprop="url">深入理解【观察者模式】技术内幕</a>
+          <a href="/2021/07/02/%E9%87%8D%E5%86%99equals%E4%B8%8EhashCode/" class="post-title-link" itemprop="url">重写equals()和hashCode()</a>
         </h2>
 
         <div class="post-meta-container">
@@ -267,7 +267,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+          <a href="/categories/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
         </span>
     </span>
 
@@ -281,8 +281,8 @@
       <span class="post-meta-item-text">Changyan：</span>
     
     
-      <a title="changyan" href="/2021/07/02/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/#SOHUCS" itemprop="discussionUrl">
-        <span id="url::https://www.xulixuli.ltd/2021/07/02/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/" class="cy_cmt_count" data-xid="2021/07/02/深入理解观察者模式技术内幕/" itemprop="commentCount"></span>
+      <a title="changyan" href="/2021/07/02/%E9%87%8D%E5%86%99equals%E4%B8%8EhashCode/#SOHUCS" itemprop="discussionUrl">
+        <span id="url::https://www.xulixuli.ltd/2021/07/02/%E9%87%8D%E5%86%99equals%E4%B8%8EhashCode/" class="cy_cmt_count" data-xid="2021/07/02/重写equals与hashCode/" itemprop="commentCount"></span>
       </a>
     
   </span>
@@ -297,11 +297,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://imgtu.com/i/RcuLRA"><img src="https://z3.ax1x.com/2021/07/02/RcuLRA.md.jpg" alt="RcuLRA.md.jpg"></a></p>
-<p><strong>摘要：</strong>见名知意，介绍设计模式中的观察者模式。大黑镇楼。
+          <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Object</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object obj)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">this</span> == obj);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span></span>;</span><br><span class="line">    </span><br><span class="line">&#125;			</span><br></pre></td></tr></table></figure>
+
+<p>从Set开始，揭开equals()和hashCode()捆绑重写的面纱。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2021/07/02/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/#more" rel="contents">
+              <a class="btn" href="/2021/07/02/%E9%87%8D%E5%86%99equals%E4%B8%8EhashCode/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -491,7 +492,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><strong>引言：</strong>创建对象在语言层面只是一个ｎｅｗ关键字。但是在虚拟机的内部却要做很多的操作，比如在堆中分配内存、设置对象头等等。本文简要介绍了java对象在内存中的布局以及对象的创建。</p>
+          <p><strong>引言：</strong>创建对象在语言层面只是一个<code>ｎｅｗ</code>关键字。但是在虚拟机的内部却要做很多的操作，比如在堆中分配内存、设置对象头等等。本文简要介绍了java对象在内存中的布局以及对象的创建。</p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/03/15/jvm%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%BF%87%E7%A8%8B/#more" rel="contents">
@@ -722,7 +723,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://www.xulixuli.ltd/2021/03/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/">
+    <link itemprop="mainEntityOfPage" href="https://www.xulixuli.ltd/2020/03/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/touxiang.jpg">
@@ -735,7 +736,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/03/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" class="post-title-link" itemprop="url">我的第一篇博客</a>
+          <a href="/2020/03/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" class="post-title-link" itemprop="url">我的第一篇博客</a>
         </h2>
 
         <div class="post-meta-container">
@@ -746,7 +747,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2021-03-08 11:54:37" itemprop="dateCreated datePublished" datetime="2021-03-08T11:54:37+08:00">2021-03-08</time>
+      <time title="创建时间：2020-03-08 11:54:37" itemprop="dateCreated datePublished" datetime="2020-03-08T11:54:37+08:00">2020-03-08</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -768,8 +769,8 @@
       <span class="post-meta-item-text">Changyan：</span>
     
     
-      <a title="changyan" href="/2021/03/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/#SOHUCS" itemprop="discussionUrl">
-        <span id="url::https://www.xulixuli.ltd/2021/03/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" class="cy_cmt_count" data-xid="2021/03/08/我的第一篇博客/" itemprop="commentCount"></span>
+      <a title="changyan" href="/2020/03/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/#SOHUCS" itemprop="discussionUrl">
+        <span id="url::https://www.xulixuli.ltd/2020/03/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" class="cy_cmt_count" data-xid="2020/03/08/我的第一篇博客/" itemprop="commentCount"></span>
       </a>
     
   </span>
@@ -788,7 +789,7 @@
 <h1 id="无论如何，很高兴认识你！小ZX呆龟！"><a href="#无论如何，很高兴认识你！小ZX呆龟！" class="headerlink" title="无论如何，很高兴认识你！小ZX呆龟！"></a>无论如何，很高兴认识你！小ZX呆龟！</h1>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2021/03/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/#more" rel="contents">
+              <a class="btn" href="/2020/03/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -844,8 +845,8 @@
   </div>
 
 <div class="copyright">
-  &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  &copy; 2021 – 
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

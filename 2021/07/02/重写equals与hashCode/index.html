@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.xulixuli.ltd","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+<meta name="description" content="12345678public class Object &amp;#123;    public boolean equals(Object obj) &amp;#123;        return (this &#x3D;&#x3D; obj);    &amp;#125;    	public native int hashCode();    &amp;#125;			  从Set开始，揭开equals()和hashCode()捆绑重写的面">
+<meta property="og:type" content="article">
+<meta property="og:title" content="重写equals()和hashCode()">
+<meta property="og:url" content="https://www.xulixuli.ltd/2021/07/02/%E9%87%8D%E5%86%99equals%E4%B8%8EhashCode/index.html">
+<meta property="og:site_name" content="阿旭的博客">
+<meta property="og:description" content="12345678public class Object &amp;#123;    public boolean equals(Object obj) &amp;#123;        return (this &#x3D;&#x3D; obj);    &amp;#125;    	public native int hashCode();    &amp;#125;			  从Set开始，揭开equals()和hashCode()捆绑重写的面">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-07-02T04:06:04.000Z">
+<meta property="article:modified_time" content="2022-07-31T08:34:38.319Z">
+<meta property="article:author" content="aaaXu">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://www.xulixuli.ltd/2021/07/02/%E9%87%8D%E5%86%99equals%E4%B8%8EhashCode/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>重写equals()和hashCode() | 阿旭的博客</title>
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?42479d2c22aec2093e58c73f78855424";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">阿旭的博客</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Good Good Study, Day Day Up</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-所有文章"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>所有文章</a></li>
+        <li class="menu-item menu-item-文章分类"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类</a></li>
+        <li class="menu-item menu-item-交大の猫"><a href="/miaomiao/" rel="section"><i class="fas fa-cat fa-fw"></i>交大の猫</a></li>
+        <li class="menu-item menu-item-讨论区"><a href="/discuss/" rel="section"><i class="fas fa-comment-dots fa-fw"></i>讨论区</a></li>
+        <li class="menu-item menu-item-关于博主"><a href="/aboutme/" rel="section"><i class="fa fa-user fa-fw"></i>关于博主</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E9%87%8D%E5%86%99%E8%A7%84%E5%88%99"><span class="nav-number">1.</span> <span class="nav-text">1 重写规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E4%BD%95%E4%B8%BAequals%E6%96%B9%E6%B3%95%EF%BC%9F%E4%BD%95%E4%B8%BAhashcode%E6%96%B9%E6%B3%95%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">2 何为equals方法？何为hashcode方法？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Set%E7%9A%84%E9%97%AE%E9%A2%98%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">3.</span> <span class="nav-text">3 Set的问题与解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E8%B7%91%E4%B8%8D%E6%8E%89%E7%9A%84Set%E5%94%AF%E4%B8%80%E6%80%A7%E6%A3%80%E6%9F%A5"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 跑不掉的Set唯一性检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E6%8F%90%E9%AB%98%E6%80%A7%E8%83%BD%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 提高性能带来的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 解决方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">4 总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="aaaXu"
+      src="/images/touxiang.jpg">
+  <p class="site-author-name" itemprop="name">aaaXu</p>
+  <div class="site-description" itemprop="description">学海无涯</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/aaaxu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;aaaxu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/aaaxu" class="github-corner" title="My GitHub" aria-label="My GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.xulixuli.ltd/2021/07/02/%E9%87%8D%E5%86%99equals%E4%B8%8EhashCode/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+      <meta itemprop="name" content="aaaXu">
+      <meta itemprop="description" content="学海无涯">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="阿旭的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          重写equals()和hashCode()
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-02 12:06:04" itemprop="dateCreated datePublished" datetime="2021-07-02T12:06:04+08:00">2021-07-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    
+      <a title="changyan" href="/2021/07/02/%E9%87%8D%E5%86%99equals%E4%B8%8EhashCode/#SOHUCS" itemprop="discussionUrl">
+        <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2021/07/02/重写equals与hashCode/" itemprop="commentCount"></span>
+      </a>
+    
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Object</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object obj)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">this</span> == obj);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span></span>;</span><br><span class="line">    </span><br><span class="line">&#125;			</span><br></pre></td></tr></table></figure>
+
+<p>从Set开始，揭开equals()和hashCode()捆绑重写的面纱。</p>
+<span id="more"></span>
+
+<h2 id="1-重写规则"><a href="#1-重写规则" class="headerlink" title="1 重写规则"></a>1 重写规则</h2><p>官方重写规则：</p>
+<p>1 如果重写了equals方法，那么一定要重写hashCode方法。如果只是重写hashCode方法，那么<strong>不必须</strong>重写equals方法。<strong>你可以理解为equals方法比较娇贵</strong>，每次自己有变化，都要拉hashcode方法下水。</p>
+<p>2 如果你只是重写了hashcode方法而没有重写equals方法（前面说过，这是允许的），那么也要受限于以下原则：</p>
+<p>在equals方法没被修改的前提下，多次调用同一对象的hashcode方法返回的值必须是相同的整数；</p>
+<p><strong>如果两个对象互相equals，那么这两个对象的hashcode值必须相等；</strong></p>
+<p>为不同对象生成不同的hashcode可以提升哈希表的性能；</p>
+<h2 id="2-何为equals方法？何为hashcode方法？"><a href="#2-何为equals方法？何为hashcode方法？" class="headerlink" title="2 何为equals方法？何为hashcode方法？"></a>2 何为equals方法？何为hashcode方法？</h2><p>在开始之前，你必须了解这两个方法各自的含义，这两个概念并不难，网上已经说烂了，我也不想再赘述。但是其他的博客常常会犯一个错误，那就是将Object中的hashcode方法与HashMap中的hash方法混为一谈。    </p>
+<p>你一定要清楚一个事情，那就是<strong>equals方法和hashcode方法都是Object的方法！</strong>不要将Object中的hashcode方法与HashMap中的hash方法混为一谈！详细可见我的另一篇专门讲述二者区别的博客。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Object</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object obj)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">this</span> == obj);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span></span>;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>HashMap从Object继承了equals方法和hashcode方法，并且自身又添加了属于自己的hash方法。而hash方法才是真正用来计算元素在hash数组中的定位的，并不是hashcode方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HashMap</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> h;</span><br><span class="line">        <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="number">16</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-Set的问题与解决方案"><a href="#3-Set的问题与解决方案" class="headerlink" title="3 Set的问题与解决方案"></a>3 Set的问题与解决方案</h2><p>equals()和hashCode()一起重写的规则，与Set的元素唯一性有密不可分的关系。所以在这之前，建议先对Set实现元素唯一性有足够的了解。</p>
+<p>​            </p>
+<h3 id="3-1-跑不掉的Set唯一性检查"><a href="#3-1-跑不掉的Set唯一性检查" class="headerlink" title="3.1 跑不掉的Set唯一性检查"></a>3.1 跑不掉的Set唯一性检查</h3><p>Java中的Collection有两类，一类是List，一类是Set。List内的元素是有序的，元素可以重复。Set元素无序，但元素不可重复。要想保证元素不重复，<strong>我们最首先能想到的最简单粗暴的方式就是用Object.equals方法</strong>。但若每增加一个元素就检查一次，那么当元素很多时，后添加到集合中的元素比较的次数就非常多了。也就是说若集合中已有1000个元素，那么第1001个元素加入集合时，它就要调用1000次equals方法。这显然会大大降低效率。于是为了提升Set的唯一性检查的效率，Java引入了了哈希表的特性，这就是Set的一个实现：<strong>HashSet</strong>。当然，你也可能会想到用别的方法进行唯一性检查，比如二叉排序树将比较的时间复杂度降到 lgn？好巧不巧，Java团队也想到了！除了用Hash思想来提高Set唯一性检查的性能外，Java官方也想到了引入二叉排序树的思想，于是又有了Set的另一个实现：<strong>TreeSet</strong>。但是我们今天先只看HashSet，对于TreeSet，你只需要清楚，这两个只不过是为了提高Set唯一性检查的性能采用了不同的手段，又导致了不同的特性。</p>
+<p>​            </p>
+<p>当Set接收一个元素时根据，会对该对象的hashCode方法产生的结果（以后称其为hash值）进行进一步的hash()运算，这个hash才是真正的寻位hash，寻位hash的结果将决定这个对象存储到哪一个链表上，再在这个链表里调用equeals方法来检查唯一性，这样就大幅降低了插入元素时需要进行比较的次数：从全局元素比较变成只跟一条拉链上的元素比较。</p>
+<p>​                </p>
+<h3 id="3-2-提高性能带来的问题"><a href="#3-2-提高性能带来的问题" class="headerlink" title="3.2 提高性能带来的问题"></a>3.2 提高性能带来的问题</h3><p>上面方法确实提高了效率。但一个面临问题：hashSet原理是先按hashcode的hash()结果分，假如，重写了equals却没有重写hashcode()，两个对象equals相等，hashcode却不同（如果你不重写hashcode()，那就是默认使用对象内存地址，不同对象的内存地址必不相同）。<strong>那么这两个对象会被存到不同的拉链上，根本不会触发equals方法，结果都被放进HashSet了。</strong>给我们的感觉就是，两个在逻辑上equals的对象，却被Set全都存入了，逻辑与实际矛盾。</p>
+<p>​            </p>
+<h3 id="3-3-解决方法"><a href="#3-3-解决方法" class="headerlink" title="3.3 解决方法"></a>3.3 解决方法</h3><p>那当然就是重写equals一定要重写hashcode了！修改equals方法一定要修改hashcode（），<strong>不要不以为意！</strong>默认的hashcode（）是对象的地址，而如果我们重写了euqals（）使得两个<strong>地址不同</strong>的对象具有<strong>逻辑上（</strong>也就是equals（）<strong>）</strong>的相等性。那么对这种元素使用set【<strong>必定</strong>】会出bug。因为两个对象的地址一定是不一样的，默认hashcode（）使用地址的情况下，set必定会将任意两个使用默认hash’code（）的对象认为是不相同的。</p>
+<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4 总结"></a>4 总结</h2><ul>
+<li><p>hashcode的存在就是为了hash表（hashmap或者hashset）没别的用。</p>
+</li>
+<li><p>在hashset中，判断元素不唯一的标准是：先要落在同一条拉链上（hashcode相同），再用equals方法判断唯一性。如果没落在同一个拉链上（hashcode不相等），就不会触发equals相等的情况。Set <strong>认为他们不一样。</strong></p>
+</li>
+<li><p>为什么set在判断两个对象是否相等的时候，要落到同一个拉链上再进行equals比较呢，为什么不直接就进行比较呢？因为set里面元素如果很多，来一个元素直接跟set中所有的对象挨个遍历进行比较，会极其耗时。所以先用hashcode（） 进行定位，就可以将比较equals的范围缩短到这一条拉链上，极大提高效率。所以这个先hashcode（）再equals的初衷其实是为了<strong>提高性能</strong>。</p>
+</li>
+<li><p>官方要求保证”*<em>equals</em>***相等一定要hashcode相等，hashcode相等不一定equals相等“的原因就是 3。</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/03/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%A4%96%E9%83%A8%E6%8E%92%E5%BA%8F%E5%B7%A5%E5%85%B7/" rel="next" title="大规模数据外部排序工具">
+                  大规模数据外部排序工具 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">冀ICP备2021002135号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2021 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">aaaXu</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+  <script>
+  NexT.utils.loadComments('#SOHUCS', () => {
+    NexT.utils.getScript('https://changyan.sohu.com/upload/changyan.js', () => {
+      window.changyan.api.config({
+        appid: 'cyvxm2pbi',
+        conf : 'prod_739bcda75a20596e51a2964edde3b31b'
+      });
+    });
+  });
+  </script>
+  <script src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+
+</body>
+</html>
