@@ -23,17 +23,17 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"www.xulixuli.ltd","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
-<meta name="description" content="摘要：要想学习JVM，首先需要了解JVM的运行时的内存布局。本文介绍了JVM运行时内存数据区，包括程序计数器、虚拟机栈、本地方法栈、堆、方法区的概念。 关键词：JVM  虚拟机  运行时数据区  博主的建议纵然JVM运行时数据区对学习ｊｖｍ很重要，但是初学者在对JVM没有整体的认识的情况下，直接学习这部分内容会学的一头雾水，也很难真正理解这部分内容。比如 “方法区存放类型信息、常量” 这句话，如">
+<meta name="description" content="摘要：要想学习JVM，首先需要了解JVM的运行时的内存布局。本文介绍了JVM运行时内存数据区，包括程序计数器、虚拟机栈、本地方法栈、堆、方法区的概念。 关键词：JVM  虚拟机  运行时数据区">
 <meta property="og:type" content="article">
 <meta property="og:title" content="JVM运行时数据区">
 <meta property="og:url" content="https://www.xulixuli.ltd/2021/03/10/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/index.html">
 <meta property="og:site_name" content="阿旭的博客">
-<meta property="og:description" content="摘要：要想学习JVM，首先需要了解JVM的运行时的内存布局。本文介绍了JVM运行时内存数据区，包括程序计数器、虚拟机栈、本地方法栈、堆、方法区的概念。 关键词：JVM  虚拟机  运行时数据区  博主的建议纵然JVM运行时数据区对学习ｊｖｍ很重要，但是初学者在对JVM没有整体的认识的情况下，直接学习这部分内容会学的一头雾水，也很难真正理解这部分内容。比如 “方法区存放类型信息、常量” 这句话，如">
+<meta property="og:description" content="摘要：要想学习JVM，首先需要了解JVM的运行时的内存布局。本文介绍了JVM运行时内存数据区，包括程序计数器、虚拟机栈、本地方法栈、堆、方法区的概念。 关键词：JVM  虚拟机  运行时数据区">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://z3.ax1x.com/2021/07/02/RceR2t.md.jpg">
 <meta property="og:image" content="https://z3.ax1x.com/2021/07/02/RcIRf0.png">
 <meta property="article:published_time" content="2021-03-10T11:36:47.000Z">
-<meta property="article:modified_time" content="2021-07-02T12:02:52.336Z">
+<meta property="article:modified_time" content="2022-08-07T07:11:47.896Z">
 <meta property="article:author" content="aaaXu">
 <meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
@@ -174,7 +174,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%9A%E4%B8%BB%E7%9A%84%E5%BB%BA%E8%AE%AE"><span class="nav-number">1.</span> <span class="nav-text">博主的建议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA"><span class="nav-number">2.</span> <span class="nav-text">关于运行时数据区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E8%AE%A1%E6%95%B0%E5%99%A8"><span class="nav-number">3.</span> <span class="nav-text">程序计数器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A0%88"><span class="nav-number">4.</span> <span class="nav-text">Java虚拟机栈</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E6%96%B9%E6%B3%95%E6%A0%88"><span class="nav-number">5.</span> <span class="nav-text">本地方法栈</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E5%A0%86"><span class="nav-number">6.</span> <span class="nav-text">Java堆</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E5%8C%BA"><span class="nav-number">7.</span> <span class="nav-text">方法区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E9%87%8F%E6%B1%A0"><span class="nav-number">8.</span> <span class="nav-text">常量池</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%A6%E4%B9%A0%E5%BB%BA%E8%AE%AE"><span class="nav-number">1.</span> <span class="nav-text">学习建议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA"><span class="nav-number">2.</span> <span class="nav-text">关于运行时数据区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E8%AE%A1%E6%95%B0%E5%99%A8"><span class="nav-number">3.</span> <span class="nav-text">程序计数器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A0%88"><span class="nav-number">4.</span> <span class="nav-text">Java虚拟机栈</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E6%96%B9%E6%B3%95%E6%A0%88"><span class="nav-number">5.</span> <span class="nav-text">本地方法栈</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E5%A0%86"><span class="nav-number">6.</span> <span class="nav-text">Java堆</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E5%8C%BA"><span class="nav-number">7.</span> <span class="nav-text">方法区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E9%87%8F%E6%B1%A0"><span class="nav-number">8.</span> <span class="nav-text">常量池</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -319,9 +319,9 @@
         <p><a target="_blank" rel="noopener" href="https://imgtu.com/i/RceR2t"><img src="https://z3.ax1x.com/2021/07/02/RceR2t.md.jpg" alt="RceR2t.md.jpg"></a></p>
 <p><strong>摘要：</strong>要想学习JVM，首先需要了解JVM的运行时的内存布局。本文介绍了JVM运行时内存数据区，包括程序计数器、虚拟机栈、本地方法栈、堆、方法区的概念。</p>
 <p><strong>关键词：</strong>JVM  虚拟机  运行时数据区 </p>
-<h2 id="博主的建议"><a href="#博主的建议" class="headerlink" title="博主的建议"></a>博主的建议</h2><p>纵然JVM运行时数据区对学习ｊｖｍ很重要，但是初学者在对JVM没有整体的认识的情况下，直接学习这部分内容会学的一头雾水，也很难真正理解这部分内容。比如 “方法区存放类型信息、常量” 这句话，如果读者不了解class文件的结构，可能不太能区分class文件中的常量池与jvm运行时常量池的区别。所以我建议，第一遍学习先粗读，等学习完整个ｊｖｍ的知识，再回来学习第二遍，会对第一遍学习的内容有更深刻的理解。</p>
 <span id="more"></span>
 
+<h2 id="学习建议"><a href="#学习建议" class="headerlink" title="学习建议"></a>学习建议</h2><p>纵然JVM运行时数据区对学习ｊｖｍ很重要，但是初学者在对JVM没有整体的认识的情况下，直接学习这部分内容会学的一头雾水，也很难真正理解这部分内容。比如 “方法区存放类型信息、常量” 这句话，如果读者不了解class文件的结构，可能不太能区分class文件中的常量池与jvm运行时常量池的区别。所以我建议，第一遍学习先粗读，等学习完整个ｊｖｍ的知识，再回来学习第二遍，会对第一遍学习的内容有更深刻的理解。</p>
 <h2 id="关于运行时数据区"><a href="#关于运行时数据区" class="headerlink" title="关于运行时数据区"></a>关于运行时数据区</h2><p>Java虚拟机在执行Java程序的过程中会把它管理的内存分为若干个不同的数据区域。这些区域有着各自的用途，一级创建和销毁的时间，有的区域随着虚拟机进程的启动而存在，有些区域则依赖用户线程的启动和结束而建立和销毁。根据《Java虚拟机规范》中规定，jvm所管理的内存大致包括以下几个运行时数据区域，如图所示：</p>
 <p><a href=""><img src="https://z3.ax1x.com/2021/07/02/RcIRf0.png" alt="RcIRf0.png"></a></p>
 <blockquote>

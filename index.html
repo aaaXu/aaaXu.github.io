@@ -240,7 +240,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://www.xulixuli.ltd/2022/08/06/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%AF%A6%E8%A7%A3/">
+    <link itemprop="mainEntityOfPage" href="https://www.xulixuli.ltd/2022/03/06/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%AF%A6%E8%A7%A3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/touxiang.jpg">
@@ -253,7 +253,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/08/06/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%AF%A6%E8%A7%A3/" class="post-title-link" itemprop="url">Java 多线程 线程池使用</a>
+          <a href="/2022/03/06/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%AF%A6%E8%A7%A3/" class="post-title-link" itemprop="url">Java 多线程 线程池使用</a>
         </h2>
 
         <div class="post-meta-container">
@@ -264,7 +264,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-08-06 22:36:09" itemprop="dateCreated datePublished" datetime="2022-08-06T22:36:09+08:00">2022-08-06</time>
+      <time title="创建时间：2022-03-06 22:36:09" itemprop="dateCreated datePublished" datetime="2022-03-06T22:36:09+08:00">2022-03-06</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -286,8 +286,8 @@
       <span class="post-meta-item-text">Changyan：</span>
     
     
-      <a title="changyan" href="/2022/08/06/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%AF%A6%E8%A7%A3/#SOHUCS" itemprop="discussionUrl">
-        <span id="url::https://www.xulixuli.ltd/2022/08/06/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%AF%A6%E8%A7%A3/" class="cy_cmt_count" data-xid="2022/08/06/线程池详解/" itemprop="commentCount"></span>
+      <a title="changyan" href="/2022/03/06/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%AF%A6%E8%A7%A3/#SOHUCS" itemprop="discussionUrl">
+        <span id="url::https://www.xulixuli.ltd/2022/03/06/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%AF%A6%E8%A7%A3/" class="cy_cmt_count" data-xid="2022/03/06/线程池详解/" itemprop="commentCount"></span>
       </a>
     
   </span>
@@ -302,10 +302,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>介绍Java中线程以及线程池的使用。</p>
+          <p>在Java中，通过多线程并发可以提高程序对机器资源利用率，提高程序的执行效率。有多种方式可以让我们的程序并发运行，你可以自己手动一个一个的创建多个线程，也可以使用线程池一次性得到多个线程。接下来介绍不同的方式的使用方式以及应用场景。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//AbstractExecutorService实现了ExecutorService接口</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThreadPoolExecutor</span> <span class="keyword">extends</span> <span class="title">AbstractExecutorService</span></span></span><br></pre></td></tr></table></figure>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2022/08/06/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%AF%A6%E8%A7%A3/#more" rel="contents">
+              <a class="btn" href="/2022/03/06/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%AF%A6%E8%A7%A3/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -692,7 +693,6 @@
           <p><a target="_blank" rel="noopener" href="https://imgtu.com/i/RceR2t"><img src="https://z3.ax1x.com/2021/07/02/RceR2t.md.jpg" alt="RceR2t.md.jpg"></a></p>
 <p><strong>摘要：</strong>要想学习JVM，首先需要了解JVM的运行时的内存布局。本文介绍了JVM运行时内存数据区，包括程序计数器、虚拟机栈、本地方法栈、堆、方法区的概念。</p>
 <p><strong>关键词：</strong>JVM  虚拟机  运行时数据区 </p>
-<h2 id="博主的建议"><a href="#博主的建议" class="headerlink" title="博主的建议"></a>博主的建议</h2><p>纵然JVM运行时数据区对学习ｊｖｍ很重要，但是初学者在对JVM没有整体的认识的情况下，直接学习这部分内容会学的一头雾水，也很难真正理解这部分内容。比如 “方法区存放类型信息、常量” 这句话，如果读者不了解class文件的结构，可能不太能区分class文件中的常量池与jvm运行时常量池的区别。所以我建议，第一遍学习先粗读，等学习完整个ｊｖｍ的知识，再回来学习第二遍，会对第一遍学习的内容有更深刻的理解。</p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/03/10/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/#more" rel="contents">
