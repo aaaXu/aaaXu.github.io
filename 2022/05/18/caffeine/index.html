@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.xulixuli.ltd","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+<meta name="description" content="关键词：本地缓存；Caffine；Cache；Redis；多级缓存；二级缓存 简    介：缓存是高性能架构设计中不可或缺的环节。我们通常会将一些热点数据存储到基于内存实现的 Redis 或 Memcached 等缓存中间件中。这些缓存中间件往往基于内存实现，数据访问速度远高于基于硬盘的数据库（MySQL），从而极大提升系统并发量。然而，缓存中间件会带来网络开销，与本地缓存配合使用能够进一步提高系">
+<meta property="og:type" content="article">
+<meta property="og:title" content="详解本地缓存技术 Caffeine">
+<meta property="og:url" content="https://www.xulixuli.ltd/2022/05/18/caffeine/index.html">
+<meta property="og:site_name" content="阿旭的博客">
+<meta property="og:description" content="关键词：本地缓存；Caffine；Cache；Redis；多级缓存；二级缓存 简    介：缓存是高性能架构设计中不可或缺的环节。我们通常会将一些热点数据存储到基于内存实现的 Redis 或 Memcached 等缓存中间件中。这些缓存中间件往往基于内存实现，数据访问速度远高于基于硬盘的数据库（MySQL），从而极大提升系统并发量。然而，缓存中间件会带来网络开销，与本地缓存配合使用能够进一步提高系">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/3be78f9682ff48d595f0b3196b88f158.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAR2ltdG9t,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center">
+<meta property="og:image" content="https://pic1.zhimg.com/80/v2-7c41b54e871c15a069a76fb90aa2f800_720w.jpg">
+<meta property="og:image" content="https://pics2.baidu.com/feed/bd3eb13533fa828bd945a14effef673e960a5a36.jpeg?token=2ad8da79205f489a81d9bfbb104c6ad5">
+<meta property="og:image" content="https://pics2.baidu.com/feed/bd3eb13533fa828bd945a14effef673e960a5a36.jpeg?token=2ad8da79205f489a81d9bfbb104c6ad5">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200919112318270.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xfZG9uZ3lhbmc=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="article:published_time" content="2022-05-18T15:06:40.000Z">
+<meta property="article:modified_time" content="2022-08-19T17:04:18.770Z">
+<meta property="article:author" content="阿旭">
+<meta property="article:tag" content="缓存技术">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/3be78f9682ff48d595f0b3196b88f158.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAR2ltdG9t,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center">
+
+
+<link rel="canonical" href="https://www.xulixuli.ltd/2022/05/18/caffeine/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>详解本地缓存技术 Caffeine | 阿旭的博客</title>
+  
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?42479d2c22aec2093e58c73f78855424";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">阿旭的博客</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Good good study, day day up.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-主页"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>主页</a></li>
+        <li class="menu-item menu-item-所有文章"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>所有文章</a></li>
+        <li class="menu-item menu-item-文章标签"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>文章标签</a></li>
+        <li class="menu-item menu-item-文章分类"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类</a></li>
+        <li class="menu-item menu-item-校园の猫"><a href="/miaomiao/" rel="section"><i class="fas fa-cat fa-fw"></i>校园の猫</a></li>
+        <li class="menu-item menu-item-博主"><a href="/aboutme/" rel="section"><i class="fa fa-user fa-fw"></i>博主</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="阿旭"
+      src="/images/touxiang.jpg">
+  <p class="site-author-name" itemprop="name">阿旭</p>
+  <div class="site-description" itemprop="description">软件开发学生党</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/aaaxu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;aaaxu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/aaaxu" class="github-corner" title="My GitHub" aria-label="My GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.xulixuli.ltd/2022/05/18/caffeine/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+      <meta itemprop="name" content="阿旭">
+      <meta itemprop="description" content="软件开发学生党">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="阿旭的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          详解本地缓存技术 Caffeine
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-05-18 23:06:40" itemprop="dateCreated datePublished" datetime="2022-05-18T23:06:40+08:00">2022-05-18</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    
+      <a title="changyan" href="/2022/05/18/caffeine/#SOHUCS" itemprop="discussionUrl">
+        <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2022/05/18/caffeine/" itemprop="commentCount"></span>
+      </a>
+    
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><strong>关键词：</strong>本地缓存；Caffine；Cache；Redis；多级缓存；二级缓存</p>
+<p><strong>简    介：</strong>缓存是高性能架构设计中不可或缺的环节。我们通常会将一些热点数据存储到基于内存实现的 Redis 或 Memcached 等缓存中间件中。这些缓存中间件往往基于内存实现，数据访问速度远高于基于硬盘的数据库（MySQL），从而极大提升系统并发量。然而，缓存中间件会带来网络开销，与本地缓存配合使用能够进一步提高系统性能，如Guava cache或Caffeine。因此，产生了使用本地缓存作为一级缓存、使用远程缓存作为二级缓存的两级缓存架构。本文主要介绍本地缓存 <strong>Caffine</strong> 的基本用法。</p>
+<span id="more"></span>
+
+<h1 id="为什么使用缓存？"><a href="#为什么使用缓存？" class="headerlink" title="为什么使用缓存？"></a>为什么使用缓存？</h1><p>先复习一下，在计算机组成原理中学过，计算机有多级存储结构，数据IO最快的是直接与CPU相连的Cache，其次是内存，最慢的是硬盘，为了提高机器的运行速度，会先将硬盘中的数据读取到内存中，再将内存中的数据读取到Cache中，CPU直接与高速缓存Cache通信，这里内存和Cache的存在都是为了减少对硬盘的直接访问，因为硬盘IO非常慢。上述概念是一台单体计算机硬件的访存架构，对比来看，后端开发领域面临着同样的问题。后端程序往往将数据持久化的存储在MySQL或者Oracle等关系型数据库中，这些数据库虽然功能强大，但是却是基于硬盘存储数据的，后端程序每次从MySQL获取数据，都要承担高额的硬盘IO开销，这是高性能程序无法容忍的。</p>
+<p>于是，参考计组的多级存储结构，很容易想到将从硬盘中读取到的数据存储到内存中，也就是缓存。缓存一般有两种，一种是运行在其他服务器上的远端缓存，例如redis、memcache，他们基于内存存储数据，具有较快的IO速度，但在访问时仍存在一定的网络开销。另一种就是将数据缓存在运行后端程序的机器本地内存上，这就是本地缓存，本地缓存不仅基于内存实现，还能避免网络开销，具有极高的数据访问性能。</p>
+<p>企业实践中往往会同时使用这两种缓存，其中本地缓存作为一级缓存，远端缓存作为二级缓存，组成两级缓存架构，两级缓存的访问流程如图所示（来源csdn）：</p>
+<p><img src="https://img-blog.csdnimg.cn/3be78f9682ff48d595f0b3196b88f158.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAR2ltdG9t,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<p>本文对redis、memcache等远端缓存不作过多叙述，主要介绍本地缓存。</p>
+<h1 id="本地缓存技术"><a href="#本地缓存技术" class="headerlink" title="本地缓存技术"></a>本地缓存技术</h1><h2 id="尝试造轮子"><a href="#尝试造轮子" class="headerlink" title="尝试造轮子"></a>尝试造轮子</h2><p>已有许多的优秀的本地缓存库，例如Guava、Caffeine，但他们优秀在哪里呢？不了解本地缓存技术的细节以及痛点，你很可能只会使用Caffeine，而不知道为什么使用。所以这里简单介绍一下通用的本地缓存技术点。</p>
+<p>所谓缓存数据，无非就是让数据驻留在内存中，想象一下，如果由你自己去实现一个缓存，你会怎么实现呢？最简单的，我们可以 new 一个 HashMap，然后将数据存储到Map中，后续获取时直接根据缓存的key值从Map中取出数据，时间复杂度是O(1)。</p>
+<p>但是用这个Map来做缓存存在一个严重问题：数据不会自动remove掉。随着你一直往Map里put数据，Map占用内存会越来越大，最终导致内存溢出。你想到了一个粗暴的办法：每过一分钟自动remove掉 map.size()/2 的数据，直接解决了内存溢出问题。</p>
+<p>但是问题又来了，有一些数据是被频繁访问的，无脑remove掉之后，程序就会去二级缓存甚至MySQL重新把它加载回来，你不仅白remove了，还造成了网络开销甚至硬盘开销。而另外一些数据可能这辈子就用了一次，但由于它运气好，一直没被remove掉，导致它持续占用内存。</p>
+<p>于是你现在面临这样的问题：想用一个容器缓存一些数据，但又要限制住这个容器的体积，及时淘汰掉一些无用的数据，使得容器中保存的数据总是“最有用”的。也就是说，你需要一个【淘汰策略 】。</p>
+<h2 id="淘汰策略"><a href="#淘汰策略" class="headerlink" title="淘汰策略"></a>淘汰策略</h2><p>Congratulations！庆幸的是，淘汰策略不需要你自己去想，已经有大佬想出来了很多淘汰策略，这里简单介绍几种淘汰策略以及实现方法：</p>
+<h3 id="LRU及其实现"><a href="#LRU及其实现" class="headerlink" title="LRU及其实现"></a>LRU及其实现</h3><p>LRU-least recently used-最近最少使用算法，是一种内存数据淘汰策略，使用常见是当内存不足时，需要淘汰最近最少使用的数据。LRU常用语缓存系统的淘汰策略。</p>
+<p><strong>LRU算法实现</strong></p>
+<p>LRU 缓存机制可以通过哈希表辅以双向链表实现，我们用一个哈希表和一个双向链表维护所有在缓存中的键值对。双向链表按照被使用的顺序存储了这些键值对，靠近头部的键值对是最近使用的，而靠近尾部的键值对是最久未使用的。如图所示：</p>
+<p><img src="https://pic1.zhimg.com/80/v2-7c41b54e871c15a069a76fb90aa2f800_720w.jpg" alt="img">这样，我们首先使用哈希表进行定位，找出缓存项在双向链表中的位置，随后将其移动到双向链表的头部，即可在 O(1)O(1) 的时间内完成 get 或者 put 操作。具体的方法如下：</p>
+<ul>
+<li><p>对于 get 操作，首先判断 key 是否存在：</p>
+<ul>
+<li><p>如果 key 不存在，则返回 -1−1；</p>
+</li>
+<li><p>如果 key 存在，则 key 对应的节点是最近被使用的节点。通过哈希表定位到该节点在双向链表中的位置，并将其移动到双向链表的头部，最后返回该节点的值。</p>
+</li>
+</ul>
+</li>
+<li><p>对于 put 操作，首先判断 key 是否存在：</p>
+<ul>
+<li><p>如果 key 不存在，使用 key 和 value 创建一个新的节点，在双向链表的头部添加该节点，并将 key 和该节点添加进哈希表中。然后判断双向链表的节点数是否超出容量，如果超出容量，则删除双向链表的尾部节点，并删除哈希表中对应的项；</p>
+</li>
+<li><p>如果 key 存在，则与 get 操作类似，先通过哈希表定位，再将对应的节点的值更新为 value，并将该节点移到双向链表的头部。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>上述各项操作中，访问哈希表的时间复杂度为 O(1)O(1)，在双向链表的头部添加节点、在双向链表的尾部删除节点的复杂度也为 O(1)O(1)。而将一个节点移到双向链表的头部，可以分成「删除该节点」和「在双向链表的头部添加节点」两步操作，都可以在 O(1)O(1) 时间内完成。<br>源码如下（转自力扣）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LRUCache</span> </span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">DLinkedNode</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> key;</span><br><span class="line">        <span class="keyword">int</span> value;</span><br><span class="line">        DLinkedNode prev;</span><br><span class="line">        DLinkedNode next;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">DLinkedNode</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">DLinkedNode</span><span class="params">(<span class="keyword">int</span> _key, <span class="keyword">int</span> _value)</span> </span>&#123;key = _key; value = _value;&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Map&lt;Integer, DLinkedNode&gt; cache = <span class="keyword">new</span> HashMap&lt;Integer, DLinkedNode&gt;();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> size;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> capacity;</span><br><span class="line">    <span class="keyword">private</span> DLinkedNode head, tail;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">LRUCache</span><span class="params">(<span class="keyword">int</span> capacity)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.size = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">this</span>.capacity = capacity;</span><br><span class="line">        <span class="comment">// 使用伪头部和伪尾部节点</span></span><br><span class="line">        head = <span class="keyword">new</span> DLinkedNode();</span><br><span class="line">        tail = <span class="keyword">new</span> DLinkedNode();</span><br><span class="line">        head.next = tail;</span><br><span class="line">        tail.prev = head;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">get</span><span class="params">(<span class="keyword">int</span> key)</span> </span>&#123;</span><br><span class="line">        DLinkedNode node = cache.get(key);</span><br><span class="line">        <span class="keyword">if</span> (node == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 如果 key 存在，先通过哈希表定位，再移到头部</span></span><br><span class="line">        moveToHead(node);</span><br><span class="line">        <span class="keyword">return</span> node.value;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">put</span><span class="params">(<span class="keyword">int</span> key, <span class="keyword">int</span> value)</span> </span>&#123;</span><br><span class="line">        DLinkedNode node = cache.get(key);</span><br><span class="line">        <span class="keyword">if</span> (node == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 如果 key 不存在，创建一个新的节点</span></span><br><span class="line">            DLinkedNode newNode = <span class="keyword">new</span> DLinkedNode(key, value);</span><br><span class="line">            <span class="comment">// 添加进哈希表</span></span><br><span class="line">            cache.put(key, newNode);</span><br><span class="line">            <span class="comment">// 添加至双向链表的头部</span></span><br><span class="line">            addToHead(newNode);</span><br><span class="line">            ++size;</span><br><span class="line">            <span class="keyword">if</span> (size &gt; capacity) &#123;</span><br><span class="line">                <span class="comment">// 如果超出容量，删除双向链表的尾部节点</span></span><br><span class="line">                DLinkedNode tail = removeTail();</span><br><span class="line">                <span class="comment">// 删除哈希表中对应的项</span></span><br><span class="line">                cache.remove(tail.key);</span><br><span class="line">                --size;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 如果 key 存在，先通过哈希表定位，再修改 value，并移到头部</span></span><br><span class="line">            node.value = value;</span><br><span class="line">            moveToHead(node);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">addToHead</span><span class="params">(DLinkedNode node)</span> </span>&#123;</span><br><span class="line">        node.prev = head;</span><br><span class="line">        node.next = head.next;</span><br><span class="line">        head.next.prev = node;</span><br><span class="line">        head.next = node;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">removeNode</span><span class="params">(DLinkedNode node)</span> </span>&#123;</span><br><span class="line">        node.prev.next = node.next;</span><br><span class="line">        node.next.prev = node.prev;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">moveToHead</span><span class="params">(DLinkedNode node)</span> </span>&#123;</span><br><span class="line">        removeNode(node);</span><br><span class="line">        addToHead(node);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> DLinkedNode <span class="title">removeTail</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        DLinkedNode res = tail.prev;</span><br><span class="line">        removeNode(res);</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="LFU以及实现"><a href="#LFU以及实现" class="headerlink" title="LFU以及实现"></a>LFU以及实现</h3><p>为什么要引入LFU算法呢？因为LRU算法淘汰数据的立足点是根据使用时间间隔淘汰数据，将当前内存中最长时间没有使用过的数据清理掉。这样就存在一个问题：如果一个不会经常使用的数据偶然被使用了一次，那这个并不被经常使用的数据就会一直待在内存中，浪费内存空间。如果我们想淘汰内存中不经常使用的数据，保留经常使用的热点数据，就要使用到LFU算法了。</p>
+<p>LFU的全称为Least Frequently Used，意思就是最不频繁使用，所以，LFU算法会淘汰掉使用频率最低的数据。如果存在相同使用频率的数据，则再根据使用时间间隔，将最久未使用的数据淘汰。</p>
+<p><strong>LFU算法的实现</strong><br>前面LRU使用了一个hash表+一个双向链表，hash表中存储了key值对应的具体node节点，node节点之间组成了一个双向链表，这样既提高了查询效率，又提高了操作效率。同样作为内存淘汰算法，LFU也需要使用类似的数据结构实现，不过LFU算法淘汰数据是基于使用频率的，所以，我们需要快速找到同一频率的所有节点，然后按照需要淘汰掉最久没被使用过的数据。所以，首先我们要有一个hash表来存储每个频次对应的所有节点信息，同时为了保证操作效率，节点与节点之间同样要组成一个双向链表，得到如下结构：</p>
+<p><img src="https://pics2.baidu.com/feed/bd3eb13533fa828bd945a14effef673e960a5a36.jpeg?token=2ad8da79205f489a81d9bfbb104c6ad5" alt="img"></p>
+<p>hash表中的key表示访问次数，value就是一个双向链表，链表中所有节点都是被访问过相同次数的数据节点。可以看到，相比较于LRU算法中的节点信息，LFU算法中节点的要素中除了包含具体的key和value之外，还包含了一个freq要素，这个要素就是访问次数，同hash表中的key值一致。这样做的好处是当根据key查找得到一个节点时，我们可以同时得到该节点被访问的次数，从而得到当前访问次数的所有节点。</p>
+<p>有了LFU算法的主体结构之后，我们发现还缺少一个重要功能，就是如何根据key值获取value值。所以，参考LRU算法的数据结构，我们还需要有一个hash表来存储key值与节点之间的对应关系。最终，我们就可以得到LFU算法完整的数据结构：</p>
+<p><img src="https://pics2.baidu.com/feed/bd3eb13533fa828bd945a14effef673e960a5a36.jpeg?token=2ad8da79205f489a81d9bfbb104c6ad5" alt="img"></p>
+<ul>
+<li>基于上面的数据结构，我们就可以实现完整的LRU算法功能。首先看下查询数据的get操作的具体逻辑：<ul>
+<li>如果key不存在返回null；</li>
+<li>如果key存在，则返回对应节点的value值。同时，需要将节点的访问次数+1，然后将该节点从原双向链表中移除，添加到新的访问次数对应的双向链表中。注意：如果原来访问次数对应的双向链表在移除该节点之后，只剩下了head节点和tail节点，说明没有真实的业务数据节点存在，则需要从访问次数hash表中移除这个链表。</li>
+</ul>
+</li>
+<li>put操作的具体逻辑：<ul>
+<li>如果key已经存在，则更新对应节点的value值，然后将该节点的访问次数+1，然后将该节点从原双向链表中移除，添加到新的访问次数对应的双向链表中。注意：如果原来访问次数对应的双向链表在移除该节点之后，只剩下了head节点和tail节点，说明没有真实的业务数据节点存在，则需要从访问次数hash表中移除这个链表。</li>
+<li>如果key不存在，则执行新增数据的动作：如果还未达到最大容量，则插入新的数据节点。节点的访问次数为1，如果hash表中不存在对应的双向链表则需要先创建链表；如果超过了最大容量，则需要先删除访问次数最低的节点，再插入新节点。节点的访问次数为1，如果hash表中不存在对应的双向链表则需要先创建链表。</li>
+</ul>
+</li>
+</ul>
+<h2 id="本地缓存组件的其他关注点"><a href="#本地缓存组件的其他关注点" class="headerlink" title="本地缓存组件的其他关注点"></a>本地缓存组件的其他关注点</h2><p>淘汰策略是缓存组件的一个很重要的关注点，直接关系到缓存的命中率。上面只是简单的介绍了两个淘汰策略的实现，看完就已经够让人掉头发的了。然而，要手动实现一个本地缓存组件，除了淘汰策略还要考虑其他问题：</p>
+<ol>
+<li>存储；并可以读、写；</li>
+<li>原子操作(线程安全)，如ConcurrentHashMap</li>
+<li>可以设置缓存的最大限制；</li>
+<li>超过最大限制有对应淘汰策略，如LRU、LFU</li>
+<li>过期时间淘汰，如定时、懒式、定期；</li>
+<li>持久化</li>
+<li>统计监控</li>
+</ol>
+<p>简单的一个Map肯定是无法实现上述功能的，需要我们充分考虑各种需求，然后去实现。有如下几种选型方案：</p>
+<p><strong>本地缓存方案选型</strong></p>
+<ol>
+<li><p>使用ConcurrentHashMap实现本地缓存<br>缓存的本质就是存储在内存中的KV数据结构，对应的就是jdk中线程安全的ConcurrentHashMap，但是要实现缓存，还需要考虑淘汰、最大限制、缓存过期时间淘汰等等功能；优点是实现简单，不需要引入第三方包，比较适合一些简单的业务场景。缺点是如果需要更多的特性，需要定制化开发，成本会比较高，并且稳定性和可靠性也难以保障。对于比较复杂的场景，建议使用比较稳定的开源工具。</p>
+</li>
+<li><p>基于Guava Cache实现本地缓存<br>Guava是Google团队开源的一款 Java 核心增强库，包含集合、并发原语、缓存、IO、反射等工具箱，性能和稳定性上都有保障，应用十分广泛。Guava Cache支持很多特性：</p>
+<ul>
+<li>支持最大容量限制</li>
+<li>支持两种过期删除策略（插入时间和访问时间）</li>
+<li>支持简单的统计功能</li>
+<li>基于LRU算法实现3. Caffeine</li>
+</ul>
+</li>
+<li><p>Caffeine是基于java8实现的新一代缓存工具，缓存性能接近理论最优。可以看作是Guava Cache的增强版，功能上两者类似，不同的是Caffeine采用了一种结合LRU、LFU优点的算法：W-TinyLFU，在性能上有明显的优越性。也是接下来重点介绍的技术。</p>
+</li>
+</ol>
+<h1 id="Caffeine"><a href="#Caffeine" class="headerlink" title="Caffeine"></a>Caffeine</h1><p>Caffeine的底层数据存储采用ConcurrentHashMap。因为Caffeine面向JDK8，在jdk8中ConcurrentHashMap增加了红黑树，在hash冲突严重时也能有良好的读性能。Caffeine是Spring 5默认支持的Cache，可见Spring对它的看重，Spring抛弃Guava转向了Caffeine。</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><p>在 pom.xml 中添加 caffeine 依赖：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;com.github.ben-manes.caffeine&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;caffeine&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;version&gt;自己去看最新稳定版本&lt;&#x2F;version&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<p>创建一个 Caffeine 缓存（类似一个map）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Cache&lt;String, Object&gt; manualCache = Caffeine.newBuilder()</span><br><span class="line">        .expireAfterWrite(<span class="number">10</span>, TimeUnit.MINUTES)</span><br><span class="line">        .maximumSize(<span class="number">10_000</span>)</span><br><span class="line">        .build();</span><br></pre></td></tr></table></figure>
+
+<p>常见用法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String... args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">Cache&lt;String, String&gt; cache = Caffeine.newBuilder()</span><br><span class="line">        <span class="comment">//5秒没有读写自动删除</span></span><br><span class="line">        .expireAfterAccess(<span class="number">5</span>, TimeUnit.SECONDS)</span><br><span class="line">        <span class="comment">//最大容量1024个，超过会自动清理空间</span></span><br><span class="line">        .maximumSize(<span class="number">1024</span>)</span><br><span class="line">        .removalListener(((key, value, cause) -&gt; &#123;</span><br><span class="line">            <span class="comment">//清理通知 key,value ==&gt; 键值对   cause ==&gt; 清理原因</span></span><br><span class="line">        &#125;))</span><br><span class="line">        .build();</span><br><span class="line"></span><br><span class="line"><span class="comment">//添加值</span></span><br><span class="line">cache.put(<span class="string">&quot;张三&quot;</span>, <span class="string">&quot;浙江&quot;</span>);</span><br><span class="line"><span class="comment">//获取值</span></span><br><span class="line">cache.getIfPresent(<span class="string">&quot;张三&quot;</span>);</span><br><span class="line"><span class="comment">//remove</span></span><br><span class="line">cache.invalidate(<span class="string">&quot;张三&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="填充策略-Population"><a href="#填充策略-Population" class="headerlink" title="填充策略 Population"></a>填充策略 Population</h2><p>Caffeine可以设置填充策略，填充策略是指如何在key不存在的情况下，如何创建一个对象进行返回，主要分为下面四种：</p>
+<h3 id="1-手动-Manual"><a href="#1-手动-Manual" class="headerlink" title="1 手动 Manual"></a>1 手动 Manual</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String... args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Cache&lt;String, Integer&gt; cache = Caffeine.newBuilder().build();</span><br><span class="line"></span><br><span class="line">        Integer age1 = cache.getIfPresent(<span class="string">&quot;张三&quot;</span>);</span><br><span class="line">        System.out.println(age1);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//当key不存在时，会立即创建出对象来返回，age2不会为空</span></span><br><span class="line">        Integer age2 = cache.get(<span class="string">&quot;张三&quot;</span>, k -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;k:&quot;</span> + k);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">18</span>;</span><br><span class="line">        &#125;);</span><br><span class="line">        System.out.println(age2);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">null</span></span><br><span class="line">k:张三</span><br><span class="line"><span class="number">18</span></span><br></pre></td></tr></table></figure>
+
+<p>Cache接口允许显式的去控制缓存的检索，更新和删除。</p>
+<p>我们可以通过<code>cache.getIfPresent(key)</code> 方法来获取一个key的值，通过<code>cache.put(key, value)</code>方法显示的将数控放入缓存，但是这样子会覆盖缓原来key的数据。更加建议使用<code>cache.get(key，k - &gt; value)</code> 的方式，get 方法将一个参数为 key 的 <code>Function (createExpensiveGraph)</code> 作为参数传入。如果缓存中不存在该键，则调用这个 Function 函数，并将返回值作为该缓存的值插入缓存中。get 方法是以阻塞方式执行调用，即使多个线程同时请求该值也只会调用一次Function方法。这样可以避免与其他线程的写入竞争，这也是为什么使用 get 优于 <code>getIfPresent</code> 的原因。</p>
+<p>注意：如果调用该方法返回NULL（如上面的 <code>createExpensiveGraph</code> 方法），则<code>cache.get</code>返回null，如果调用该方法抛出异常，则get方法也会抛出异常。</p>
+<p>可以使用<code>Cache.asMap()</code> 方法获取<code>ConcurrentMap</code>进而对缓存进行一些更改。</p>
+<h3 id="2-自动-loading"><a href="#2-自动-loading" class="headerlink" title="2 自动 loading"></a>2 自动 loading</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String... args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//此时的类型是 LoadingCache 不是 Cache</span></span><br><span class="line">    LoadingCache&lt;String, Integer&gt; cache = Caffeine.newBuilder().build(key -&gt; &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;自动填充:&quot;</span> + key);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">18</span>;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    Integer age1 = cache.getIfPresent(<span class="string">&quot;张三&quot;</span>);</span><br><span class="line">    System.out.println(age1);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// key 不存在时 会根据给定的CacheLoader自动装载进去</span></span><br><span class="line">    Integer age2 = cache.get(<span class="string">&quot;张三&quot;</span>);</span><br><span class="line">    System.out.println(age2);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">null</span></span><br><span class="line">自动填充:张三</span><br><span class="line"><span class="number">18</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-异步手动-Asynchronous-Manual"><a href="#3-异步手动-Asynchronous-Manual" class="headerlink" title="3 异步手动 Asynchronous Manual"></a>3 异步手动 Asynchronous Manual</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String... args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    AsyncCache&lt;String, Integer&gt; cache = Caffeine.newBuilder().buildAsync();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//会返回一个 future对象， 调用future对象的get方法会一直卡住直到得到返回，和多线程的submit一样</span></span><br><span class="line">    CompletableFuture&lt;Integer&gt; ageFuture = cache.get(<span class="string">&quot;张三&quot;</span>, name -&gt; &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;name:&quot;</span> + name);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">18</span>;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    Integer age = ageFuture.get();</span><br><span class="line">    System.out.println(<span class="string">&quot;age:&quot;</span> + age);</span><br><span class="line">&#125;</span><br><span class="line">name:张三</span><br><span class="line">age:<span class="number">18</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-异步自动-Asynchronously-Loading"><a href="#4-异步自动-Asynchronously-Loading" class="headerlink" title="4 异步自动 Asynchronously Loading"></a>4 异步自动 Asynchronously Loading</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String... args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="comment">//和1.4基本差不多</span></span><br><span class="line">    AsyncLoadingCache&lt;String, Integer&gt; cache = Caffeine.newBuilder().buildAsync(name -&gt; &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;name:&quot;</span> + name);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">18</span>;</span><br><span class="line">    &#125;);</span><br><span class="line">    CompletableFuture&lt;Integer&gt; ageFuture = cache.get(<span class="string">&quot;张三&quot;</span>);</span><br><span class="line"></span><br><span class="line">    Integer age = ageFuture.get();</span><br><span class="line">    System.out.println(<span class="string">&quot;age:&quot;</span> + age);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="驱逐策略-eviction"><a href="#驱逐策略-eviction" class="headerlink" title="驱逐策略 eviction"></a>驱逐策略 eviction</h2><p>Caffeine提供三类驱逐策略：基于大小（size-based），基于时间（time-based）和基于引用（reference-based）。</p>
+<h3 id="基于大小（size-based）"><a href="#基于大小（size-based）" class="headerlink" title="基于大小（size-based）"></a>基于大小（size-based）</h3><p>基于大小驱逐，有两种方式：一种是基于缓存大小，一种是基于权重。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Evict based on the number of entries in the cache</span></span><br><span class="line"><span class="comment">// 根据缓存的计数进行驱逐</span></span><br><span class="line">LoadingCache&lt;Key, Graph&gt; graphs = Caffeine.newBuilder()</span><br><span class="line">    .maximumSize(<span class="number">10_000</span>)</span><br><span class="line">    .build(key -&gt; createExpensiveGraph(key));</span><br><span class="line"></span><br><span class="line"><span class="comment">// Evict based on the number of vertices in the cache</span></span><br><span class="line"><span class="comment">// 根据缓存的权重来进行驱逐（权重只是用于确定缓存大小，不会用于决定该缓存是否被驱逐）</span></span><br><span class="line">LoadingCache&lt;Key, Graph&gt; graphs = Caffeine.newBuilder()</span><br><span class="line">    .maximumWeight(<span class="number">10_000</span>)</span><br><span class="line">    .weigher((Key key, Graph graph) -&gt; graph.vertices().size())</span><br><span class="line">    .build(key -&gt; createExpensiveGraph(key));</span><br></pre></td></tr></table></figure>
+
+<p>我们可以使用<code>Caffeine.maximumSize(long)</code>方法来指定缓存的最大容量。当缓存超出这个容量的时候，会使用<em>Window-TinyLfu</em>策略来删除缓存。</p>
+<p>我们也可以使用权重的策略来进行驱逐，可以使用<code>Caffeine.weigher(Weigher)</code> 函数来指定权重，使用<code>Caffeine.maximumWeight(long)</code> 函数来指定缓存最大权重值。</p>
+<p><code>maximumWeight</code>与<code>maximumSize</code>不可以同时使用。</p>
+<h3 id="基于时间-Time-Based"><a href="#基于时间-Time-Based" class="headerlink" title="基于时间 Time Based"></a>基于时间 Time Based</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Evict based on a fixed expiration policy</span></span><br><span class="line"><span class="comment">// 基于固定的到期策略进行退出</span></span><br><span class="line">LoadingCache&lt;Key, Graph&gt; graphs = Caffeine.newBuilder()</span><br><span class="line">    .expireAfterAccess(<span class="number">5</span>, TimeUnit.MINUTES)</span><br><span class="line">    .build(key -&gt; createExpensiveGraph(key));</span><br><span class="line">LoadingCache&lt;Key, Graph&gt; graphs = Caffeine.newBuilder()</span><br><span class="line">    .expireAfterWrite(<span class="number">10</span>, TimeUnit.MINUTES)</span><br><span class="line">    .build(key -&gt; createExpensiveGraph(key));</span><br><span class="line"></span><br><span class="line"><span class="comment">// Evict based on a varying expiration policy</span></span><br><span class="line"><span class="comment">// 基于不同的到期策略进行退出</span></span><br><span class="line">LoadingCache&lt;Key, Graph&gt; graphs = Caffeine.newBuilder()</span><br><span class="line">    .expireAfter(<span class="keyword">new</span> Expiry&lt;Key, Graph&gt;() &#123;</span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">expireAfterCreate</span><span class="params">(Key key, Graph graph, <span class="keyword">long</span> currentTime)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// Use wall clock time, rather than nanotime, if from an external resource</span></span><br><span class="line">        <span class="keyword">long</span> seconds = graph.creationDate().plusHours(<span class="number">5</span>)</span><br><span class="line">            .minus(System.currentTimeMillis(), MILLIS)</span><br><span class="line">            .toEpochSecond();</span><br><span class="line">        <span class="keyword">return</span> TimeUnit.SECONDS.toNanos(seconds);</span><br><span class="line">      &#125;</span><br><span class="line">      </span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">expireAfterUpdate</span><span class="params">(Key key, Graph graph, </span></span></span><br><span class="line"><span class="function"><span class="params">          <span class="keyword">long</span> currentTime, <span class="keyword">long</span> currentDuration)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> currentDuration;</span><br><span class="line">      &#125;</span><br><span class="line">      </span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">expireAfterRead</span><span class="params">(Key key, Graph graph,</span></span></span><br><span class="line"><span class="function"><span class="params">          <span class="keyword">long</span> currentTime, <span class="keyword">long</span> currentDuration)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> currentDuration;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    .build(key -&gt; createExpensiveGraph(key));</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Caffeine提供了三种定时驱逐策略：</p>
+<ul>
+<li>expireAfterAccess(long, TimeUnit):在最后一次访问或者写入后开始计时，在指定的时间后过期。假如一直有请求访问该key，那么这个缓存将一直不会过期。</li>
+<li>expireAfterWrite(long, TimeUnit): 在最后一次写入缓存后开始计时，在指定的时间后过期。</li>
+<li>expireAfter(Expiry): 自定义策略，过期时间由Expiry实现独自计算。<br>缓存的删除策略使用的是惰性删除和定时删除。这两个删除策略的时间复杂度都是O(1)。</li>
+</ul>
+<p>测试定时驱逐不需要等到时间结束。我们可以使用Ticker接口和Caffeine.ticker(Ticker)方法在缓存生成器中指定时间源，而不必等待系统时钟。如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">FakeTicker ticker = <span class="keyword">new</span> FakeTicker(); <span class="comment">// Guava&#x27;s testlib</span></span><br><span class="line">Cache&lt;Key, Graph&gt; cache = Caffeine.newBuilder()</span><br><span class="line">    .expireAfterWrite(<span class="number">10</span>, TimeUnit.MINUTES)</span><br><span class="line">    .executor(Runnable::run)</span><br><span class="line">    .ticker(ticker::read)</span><br><span class="line">    .maximumSize(<span class="number">10</span>)</span><br><span class="line">    .build();</span><br><span class="line"></span><br><span class="line">cache.put(key, graph);</span><br><span class="line">ticker.advance(<span class="number">30</span>, TimeUnit.MINUTES)</span><br><span class="line">assertThat(cache.getIfPresent(key), is(nullValue());</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="基于引用（reference-based）"><a href="#基于引用（reference-based）" class="headerlink" title="基于引用（reference-based）"></a>基于引用（reference-based）</h3><p>我们可以将缓存的驱逐配置成基于垃圾回收器。为此，我们可以将key 和 value 配置为弱引用或只将值配置成软引用。注意：<code>AsyncLoadingCache</code>不支持弱引用和软引用。</p>
+<p><code>Caffeine.weakKeys()</code> 使用弱引用存储key。如果没有其他地方对该key有强引用，那么该缓存就会被垃圾回收器回收。由于垃圾回收器只依赖于身份(identity)相等，因此这会导致整个缓存使用身份 (==) 相等来比较 key，而不是使用 equals()。</p>
+<p><code>Caffeine.weakValues()</code> 使用弱引用存储value。如果没有其他地方对该value有强引用，那么该缓存就会被垃圾回收器回收。由于垃圾回收器只依赖于身份(identity)相等，因此这会导致整个缓存使用身份 (==) 相等来比较 key，而不是使用 equals()。</p>
+<p><code>Caffeine.softValues()</code> 使用软引用存储value。当内存满了过后，软引用的对象以将使用最近最少使用(least-recently-used ) 的方式进行垃圾回收。由于使用软引用是需要等到内存满了才进行回收，所以我们通常建议给缓存配置一个使用内存的最大值。 <code>softValues()</code> 将使用身份相等<code>(identity) (==)</code> 而不是equals() 来比较值。</p>
+<p>注意：<code>Caffeine.weakValues()</code>和<code>Caffeine.softValues()</code>不可以一起使用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Evict when neither the key nor value are strongly reachable</span></span><br><span class="line"><span class="comment">// 当key和value都没有引用时驱逐缓存</span></span><br><span class="line">LoadingCache&lt;Key, Graph&gt; graphs = Caffeine.newBuilder()</span><br><span class="line">    .weakKeys()</span><br><span class="line">    .weakValues()</span><br><span class="line">    .build(key -&gt; createExpensiveGraph(key));</span><br><span class="line"></span><br><span class="line"><span class="comment">// Evict when the garbage collector needs to free memory</span></span><br><span class="line"><span class="comment">// 当垃圾收集器需要释放内存时驱逐</span></span><br><span class="line">LoadingCache&lt;Key, Graph&gt; graphs = Caffeine.newBuilder()</span><br><span class="line">    .softValues()</span><br><span class="line">    .build(key -&gt; createExpensiveGraph(key));</span><br></pre></td></tr></table></figure>
+
+<h2 id="淘汰策略W-TinyLFU"><a href="#淘汰策略W-TinyLFU" class="headerlink" title="淘汰策略W-TinyLFU"></a>淘汰策略W-TinyLFU</h2><p>W-TinyLFU（Window Tiny Least Frequently Used）是对LFU的的优化和加强，这也是目前Caffeine所使用的淘汰策略。</p>
+<ul>
+<li>算法：当一个数据进来的时候，会进行筛选比较，进入W-LRU窗口队列，以此应对流量突增，经过淘汰后进入过滤器，通过访问访问频率判决是否进入缓存。如果一个数据最近被访问的次数很低，那么被认为在未来被访问的概率也是最低的，当规定空间用尽的时候，会优先淘汰最近访问次数很低的数据；</li>
+<li>优点：使用Count-Min Sketch算法存储访问频率，极大的节省空间；定期衰减操作，应对访问模式变化；并且使用window-lru机制能够尽可能避免缓存污染的发生，在过滤器内部会进行筛选处理，避免低频数据置换高频数据。</li>
+<li>缺点：是由谷歌工程师发明的一种算法，目前已知应用于Caffeine Cache组件里，应用不是很多。关于Count-Min Sketch算法，可以看作是布隆过滤器的同源的算法，假如我们用一个hashmap来存储每个元素的访问次数，那这个量级是比较大的，并且hash冲突的时候需要做一定处理，否则数据会产生很大的误差，Count-Min Sketch算法将一个hash操作，扩增为多个hash，这样原来hash冲突的概率就降低了几个等级，且当多个hash取得数据的时候，取最低值，也就是Count Min的含义所在。下图展示了Count-Min Sketch算法简单的工作原理：</li>
+</ul>
+<p>假设有四个hash函数，每当元素被访问时，将进行次数加1；此时会按照约定好的四个hash函数进行hash计算找到对应的位置，相应的位置进行+1操作；当获取元素的频率时，同样根据hash计算找到4个索引位置；取得四个位置的频率信息，然后根据Count Min取得最低值作为本次元素的频率值返回，即Min(Count);</p>
+<p><img src="https://img-blog.csdnimg.cn/20200919112318270.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xfZG9uZ3lhbmc=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p>参考：</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/One_hundred_nice/article/details/123950638">为什么要用本地缓存？</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/l_dongyang/article/details/108326755">Caffeine入门</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/crazymakercircle/article/details/113751575?spm=1001.2101.3001.6650.4&utm_medium=distribute.pc_relevant.none-task-blog-2~default~CTRLIST~Rate-4-113751575-blog-121623776.pc_relevant_multi_platform_whitelistv3&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2~default~CTRLIST~Rate-4-113751575-blog-121623776.pc_relevant_multi_platform_whitelistv3&utm_relevant_index=6">Caffeine （史上最全）</a></p>
+<p>力扣：手写LRU</p>
+<p><a target="_blank" rel="noopener" href="https://baijiahao.baidu.com/s?id=1729525047952230592&wfr=spider&for=pc">读懂LFU</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BC%93%E5%AD%98%E6%8A%80%E6%9C%AF/" rel="tag"><i class="fa fa-tag"></i> 缓存技术</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/03/06/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%AF%A6%E8%A7%A3/" rel="next" title="Java 多线程 线程池使用">
+                  Java 多线程 线程池使用 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">冀ICP备2021002135号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2021 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">阿旭</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+  <script>
+  NexT.utils.loadComments('#SOHUCS', () => {
+    NexT.utils.getScript('https://changyan.sohu.com/upload/changyan.js', () => {
+      window.changyan.api.config({
+        appid: 'cyvxm2pbi',
+        conf : 'prod_739bcda75a20596e51a2964edde3b31b'
+      });
+    });
+  });
+  </script>
+  <script src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+
+</body>
+</html>
