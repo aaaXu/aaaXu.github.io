@@ -23,21 +23,21 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"www.xulixuli.ltd","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
-<meta name="description" content="摘要：本文介绍了TCP报文结构、TCP三次握手、四次挥手的机制。传输控制协议（TCP，Transmission Control Protocol）是一种面向连接的、可靠的、基于字节流的传输层通信协议。TCP是面向连接的，无论哪一方向另一方发送数据之前，都必须先在双方之间建立一条连接。在TCP&#x2F;IP协议中，TCP协议提供可靠的连接服务，连接是通过三次握手进行初始化的。三次握手的目的是同步连接双方的">
+<meta name="description" content="简介：本文介绍了TCP报文结构、TCP三次握手、四次挥手的机制。传输控制协议（TCP，Transmission Control Protocol）是一种面向连接的、可靠的、基于字节流的传输层通信协议。TCP是面向连接的，无论哪一方向另一方发送数据之前，都必须先在双方之间建立一条连接。在TCP&#x2F;IP协议中，TCP协议提供可靠的连接服务，连接是通过三次握手进行初始化的。三次握手的目的是同步连接双方的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="深入理解【TCP三次握手】技术内幕">
+<meta property="og:title" content="TCP三次握手、四次挥手">
 <meta property="og:url" content="https://www.xulixuli.ltd/2021/03/10/TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/index.html">
 <meta property="og:site_name" content="阿旭的博客">
-<meta property="og:description" content="摘要：本文介绍了TCP报文结构、TCP三次握手、四次挥手的机制。传输控制协议（TCP，Transmission Control Protocol）是一种面向连接的、可靠的、基于字节流的传输层通信协议。TCP是面向连接的，无论哪一方向另一方发送数据之前，都必须先在双方之间建立一条连接。在TCP&#x2F;IP协议中，TCP协议提供可靠的连接服务，连接是通过三次握手进行初始化的。三次握手的目的是同步连接双方的">
+<meta property="og:description" content="简介：本文介绍了TCP报文结构、TCP三次握手、四次挥手的机制。传输控制协议（TCP，Transmission Control Protocol）是一种面向连接的、可靠的、基于字节流的传输层通信协议。TCP是面向连接的，无论哪一方向另一方发送数据之前，都必须先在双方之间建立一条连接。在TCP&#x2F;IP协议中，TCP协议提供可靠的连接服务，连接是通过三次握手进行初始化的。三次握手的目的是同步连接双方的">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://z3.ax1x.com/2021/07/02/RceWxP.md.jpg">
 <meta property="og:image" content="https://i.loli.net/2021/03/08/e71wTXKx25kajLo.png">
-<meta property="og:image" content="c:/Users/Liu/AppData/Roaming/Typora/typora-user-images/image-20210308162307530.png">
+<meta property="og:image" content="https://pic1.zhimg.com/80/v2-c261e806e822ccdf18c066bb9265c280_720w.jpg">
 <meta property="og:image" content="https://i.loli.net/2021/03/08/g1GCxOBtlIMHfPT.png">
 <meta property="article:published_time" content="2021-03-10T07:10:29.000Z">
-<meta property="article:modified_time" content="2021-07-02T09:50:03.257Z">
+<meta property="article:modified_time" content="2022-08-20T15:16:08.119Z">
 <meta property="article:author" content="阿旭">
-<meta property="article:tag" content="Java">
+<meta property="article:tag" content="计网">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://z3.ax1x.com/2021/07/02/RceWxP.md.jpg">
 
@@ -54,7 +54,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>深入理解【TCP三次握手】技术内幕 | 阿旭的博客</title>
+<title>TCP三次握手、四次挥手 | 阿旭的博客</title>
   
 
   <script>
@@ -190,18 +190,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">9</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">1</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -261,7 +261,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          深入理解【TCP三次握手】技术内幕
+          TCP三次握手、四次挥手
         </h1>
 
         <div class="post-meta-container">
@@ -273,15 +273,6 @@
       <span class="post-meta-item-text">发表于</span>
 
       <time title="创建时间：2021-03-10 15:10:29" itemprop="dateCreated datePublished" datetime="2021-03-10T15:10:29+08:00">2021-03-10</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
-        </span>
     </span>
 
   
@@ -318,11 +309,9 @@
     
     <div class="post-body" itemprop="articleBody">
         <p><a target="_blank" rel="noopener" href="https://imgtu.com/i/RceWxP"><img src="https://z3.ax1x.com/2021/07/02/RceWxP.md.jpg" alt="RceWxP.md.jpg"></a></p>
-<p><strong>摘要</strong>：本文介绍了TCP报文结构、TCP三次握手、四次挥手的机制。传输控制协议（TCP，Transmission Control Protocol）是一种面向连接的、可靠的、基于字节流的传输层通信协议。TCP是面向连接的，无论哪一方向另一方发送数据之前，都必须先在双方之间建立一条连接。在TCP/IP协议中，TCP协议提供可靠的连接服务，连接是通过三次握手进行初始化的。三次握手的目的是同步连接双方的序列号和确认号并交换 TCP窗口大小信息。</p>
-<p><strong>关键词：</strong>TCP报文 三次握手 四次挥手 计算机网络</p>
+<p><strong>简介</strong>：本文介绍了TCP报文结构、TCP三次握手、四次挥手的机制。传输控制协议（TCP，Transmission Control Protocol）是一种面向连接的、可靠的、基于字节流的传输层通信协议。TCP是面向连接的，无论哪一方向另一方发送数据之前，都必须先在双方之间建立一条连接。在TCP/IP协议中，TCP协议提供可靠的连接服务，连接是通过三次握手进行初始化的。三次握手的目的是同步连接双方的序列号和确认号并交换 TCP窗口大小信息。</p>
+<p><strong>关键词：</strong>TCP； 三次握手；四次挥手；计算机网络；</p>
 <span id="more"></span>
-
-
 
 <h3 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h3><p>​        IP协议工作在网络层，是计算机与计算机之间的通信，IP协议通过IP地址识别不同的计算机；TCP协议工作在传输层，是应用程序与应用程序之间的通信，TCP协议通过端口号来识别同一台计算机上的不同程序，所示使用TCP协议提供传输服务，必须指明端口号。</p>
 <blockquote>
@@ -346,7 +335,7 @@
 <p>服务端的疑惑：客户端能不能收到我的信息？（同上，服务端发一个消息，并收到客户端的回复，才能确定客户端能收到自己的消息）</p>
 </blockquote>
 <p><strong>解决上面的疑惑就需要三次握手：</strong></p>
-<p><img src="C:\Users\Liu\AppData\Roaming\Typora\typora-user-images\image-20210308162307530.png" alt="image-20210308162307530"></p>
+<p><img src="https://pic1.zhimg.com/80/v2-c261e806e822ccdf18c066bb9265c280_720w.jpg" alt="img"></p>
 <p>过程分解：</p>
 <p><strong>第一次握手</strong>：客户端请求建立连接（<code>syn = 1</code>），并<strong>随机</strong>生成序号<code>seq</code>，这里假定10000，这个序号一会儿用于服务器确认。</p>
 <p><strong>第二次握手</strong>：这时候服务器需要做，并且做了两件事：</p>
@@ -357,8 +346,7 @@
 <ol start="2">
 <li>但是服务器不知道客户端能不能接收自己的消息，所以它要干第二件事。</li>
 </ol>
-<p>​        它也要像客户端第一次发送请求一样，问问客户端能不能建立连接。于是，它自己也要发一次 <code>syn = 1</code> 来表示请求建立连接，自己也随机初始化一个序号，假如20000，用来给客户端一会儿确认用，如果一会儿客户端发来确认信息（ <code>ACK = 1，seq = 20001</code> ） ，服务器就开心了，因为他能确认客户端能收到自己的消息了。</p>
-<p>​       </p>
+<p>​        它也要像客户端第一次发送请求一样，问问客户端能不能建立连接。于是，它自己也要发一次 <code>syn = 1</code> 来表示请求建立连接，自己也随机初始化一个序号，假如20000，用来给客户端一会儿确认用，如果一会儿客户端发来确认信息（ <code>ACK = 1，seq = 20001</code> ） ，服务器就开心了，因为他能确认客户端能收到自己的消息了。       </p>
 <p> 这两件事可以放在<strong>一个TCP报文</strong>里面做，于是这次握手，服务器发给客户端的是：</p>
 <p><code>ACK = 1， seq = 10001</code> （用于确认客户端的建立连接的请求）</p>
 <p><code>Syn = 1，seq = 20000</code>  （用于向请求客户端建立连接）</p>
@@ -395,7 +383,7 @@
 <li><p>为什么服务器给客户端发完ＦＩＮ，不用等客户端的ＦＩＮ？因为客户端第一次就发了ＦＩＮ，服务器已经知道客户端不会再有请求了。</p>
 </li>
 </ol>
-<h3 id="灵魂拷问"><a href="#灵魂拷问" class="headerlink" title="灵魂拷问"></a>灵魂拷问</h3><p><strong>【问题1】为什么连接的时候是三次握手，关闭的时候却是四次握手？</strong></p>
+<h3 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h3><p><strong>【问题1】为什么连接的时候是三次握手，关闭的时候却是四次握手？</strong></p>
 <p>答：因为当Server端收到Client端的SYN连接请求报文后，可以直接发送SYN+ACK报文。其中ACK报文是用来应答的，SYN报文是用来同步的。但是关闭连接时，当Server端收到FIN报文时，很可能并不会立即关闭SOCKET，所以只能先回复一个ACK报文，告诉Client端，”你发的FIN报文我收到了”。只有等到我Server端所有的报文都发送完了，我才能发送FIN报文，因此不能一起发送。故需要四步握手。</p>
 <p><strong>【问题2】为什么TIME_WAIT状态需要经过2MSL(最大报文段生存时间)才能返回到CLOSE状态？</strong></p>
 <p>答：虽然按道理，四个报文都发送完毕，我们可以直接进入CLOSE状态了，但是我们必须假象网络是不可靠的，有可以最后一个ACK丢失。所以TIME_WAIT状态就是用来重发可能丢失的ACK报文。</p>
@@ -406,8 +394,8 @@
 <hr>
 <p>参考：</p>
 <blockquote>
-<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/8c5ccbe51f5b">https://www.jianshu.com/p/8c5ccbe51f5b</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV19E411D78Q?from=search&amp;seid=708856387005307241">https://www.bilibili.com/video/BV19E411D78Q?from=search&amp;seid=708856387005307241</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/8c5ccbe51f5b">简书</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV19E411D78Q?from=search&seid=708856387005307241">B站</a></p>
 </blockquote>
 
     </div>
@@ -417,13 +405,16 @@
     
 
     <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%BD%91/" rel="tag"><i class="fa fa-tag"></i> 计网</a>
+          </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/03/10/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/" rel="prev" title="JVM运行时数据区">
-                  <i class="fa fa-chevron-left"></i> JVM运行时数据区
+                <a href="/2021/03/10/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/" rel="prev" title="Java虚拟机内存布局">
+                  <i class="fa fa-chevron-left"></i> Java虚拟机内存布局
                 </a>
             </div>
             <div class="post-nav-item">

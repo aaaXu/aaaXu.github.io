@@ -23,17 +23,17 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"www.xulixuli.ltd","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
-<meta name="description" content="12345678public class Object &amp;#123;    public boolean equals(Object obj) &amp;#123;        return (this &#x3D;&#x3D; obj);    &amp;#125;    	public native int hashCode();    &amp;#125;			  从Set开始，揭开equals()和hashCode()捆绑重写的面">
+<meta name="description" content="12345678public class Object &amp;#123;    public boolean equals(Object obj) &amp;#123;        return (this &#x3D;&#x3D; obj);    &amp;#125;    	public native int hashCode();    &amp;#125;			  为了重写equals()必须重写hashCode()？">
 <meta property="og:type" content="article">
-<meta property="og:title" content="重写equals()和hashCode()">
+<meta property="og:title" content="为何重写equals()必须重写hashCode()？">
 <meta property="og:url" content="https://www.xulixuli.ltd/2021/07/02/%E9%87%8D%E5%86%99equals%E4%B8%8EhashCode/index.html">
 <meta property="og:site_name" content="阿旭的博客">
-<meta property="og:description" content="12345678public class Object &amp;#123;    public boolean equals(Object obj) &amp;#123;        return (this &#x3D;&#x3D; obj);    &amp;#125;    	public native int hashCode();    &amp;#125;			  从Set开始，揭开equals()和hashCode()捆绑重写的面">
+<meta property="og:description" content="12345678public class Object &amp;#123;    public boolean equals(Object obj) &amp;#123;        return (this &#x3D;&#x3D; obj);    &amp;#125;    	public native int hashCode();    &amp;#125;			  为了重写equals()必须重写hashCode()？">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-07-02T04:06:04.000Z">
-<meta property="article:modified_time" content="2022-08-07T07:58:54.214Z">
+<meta property="article:modified_time" content="2022-08-20T15:57:00.159Z">
 <meta property="article:author" content="阿旭">
-<meta property="article:tag" content="Java基础">
+<meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
 
 
@@ -49,7 +49,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>重写equals()和hashCode() | 阿旭的博客</title>
+<title>为何重写equals()必须重写hashCode()？ | 阿旭的博客</title>
   
 
   <script>
@@ -185,18 +185,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">9</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">1</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -256,7 +256,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          重写equals()和hashCode()
+          为何重写equals()必须重写hashCode()？
         </h1>
 
         <div class="post-meta-container">
@@ -305,24 +305,31 @@
     <div class="post-body" itemprop="articleBody">
         <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Object</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object obj)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">this</span> == obj);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span></span>;</span><br><span class="line">    </span><br><span class="line">&#125;			</span><br></pre></td></tr></table></figure>
 
-<p>从Set开始，揭开equals()和hashCode()捆绑重写的面纱。</p>
+<p>为了重写equals()必须重写hashCode()？</p>
 <span id="more"></span>
 
 <h2 id="1-重写规则"><a href="#1-重写规则" class="headerlink" title="1 重写规则"></a>1 重写规则</h2><p>官方重写规则：</p>
-<p>1 如果重写了equals方法，那么一定要重写hashCode方法。如果只是重写hashCode方法，那么<strong>不必须</strong>重写equals方法。<strong>你可以理解为equals方法比较娇贵</strong>，每次自己有变化，都要拉hashcode方法下水。</p>
-<p>2 如果你只是重写了hashcode方法而没有重写equals方法（前面说过，这是允许的），那么也要受限于以下原则：</p>
-<p>在equals方法没被修改的前提下，多次调用同一对象的hashcode方法返回的值必须是相同的整数；</p>
-<p><strong>如果两个对象互相equals，那么这两个对象的hashcode值必须相等；</strong></p>
-<p>为不同对象生成不同的hashcode可以提升哈希表的性能；</p>
-<h2 id="2-何为equals方法？何为hashcode方法？"><a href="#2-何为equals方法？何为hashcode方法？" class="headerlink" title="2 何为equals方法？何为hashcode方法？"></a>2 何为equals方法？何为hashcode方法？</h2><p>在开始之前，你必须了解这两个方法各自的含义，这两个概念并不难，网上已经说烂了，我也不想再赘述。但是其他的博客常常会犯一个错误，那就是将Object中的hashcode方法与HashMap中的hash方法混为一谈。    </p>
-<p>你一定要清楚一个事情，那就是<strong>equals方法和hashcode方法都是Object的方法！</strong>不要将Object中的hashcode方法与HashMap中的hash方法混为一谈！详细可见我的另一篇专门讲述二者区别的博客。</p>
+<ol>
+<li><p>如果重写了equals方法，那么<strong>一定要重写</strong>hashCode方法。如果只是重写hashCode方法，那么<strong>不必须</strong>重写equals方法。你可以理解为equals方法比较娇贵，每次自己有变化，都要拉hashcode方法下水。</p>
+</li>
+<li><p>如果你只是重写了hashcode方法而没有重写equals方法（前面说过，这是允许的），那么也要受限于以下原则：</p>
+<ul>
+<li><p>在equals方法没被修改的前提下，多次调用同一对象的hashcode方法返回的值必须是相同的整数；</p>
+</li>
+<li><p>如果两个对象互相equals，那么这两个对象的hashcode值必须相等；</p>
+</li>
+<li><p>为不同对象生成不同的hashcode可以提升哈希表的性能；</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="2-equals-amp-amp-hashcode"><a href="#2-equals-amp-amp-hashcode" class="headerlink" title="2 equals() &amp;&amp; hashcode()"></a>2 equals() &amp;&amp; hashcode()</h2><p>在开始之前，你必须了解这两个方法各自的含义，这两个概念并不难，网上已经说烂了，我也不想再赘述。但是有些博客会犯一个错误，那就是将Object中的<code>hashcode()</code>与HashMap中的<code>hash()</code>混为一谈。然而实际上，<strong>hashcode方法是Object的方法</strong>，<code>hash()</code>是HashMap或HashSet中的方法，二者并须相同。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Object</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object obj)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">this</span> == obj);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span></span>;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>HashMap从Object继承了equals方法和hashcode方法，并且自身又添加了属于自己的hash方法。而hash方法才是真正用来计算元素在hash数组中的定位的，并不是hashcode方法。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HashMap</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> h;</span><br><span class="line">        <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="number">16</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h2 id="3-Set的问题与解决方案"><a href="#3-Set的问题与解决方案" class="headerlink" title="3 Set的问题与解决方案"></a>3 Set的问题与解决方案</h2><p>equals()和hashCode()一起重写的规则，与Set的元素唯一性有密不可分的关系。所以在这之前，建议先对Set实现元素唯一性有足够的了解。</p>
-<p>​            </p>
+<h2 id="3-为何一起重写？"><a href="#3-为何一起重写？" class="headerlink" title="3 为何一起重写？"></a>3 为何一起重写？</h2><p>equals()和hashCode()一起重写的规则，与Java中涉及到Hash运算的容器类，例如HashSet、HashMap有密不可分的关系。这里以HashSet为代表，从问题出发讲解为什么重写equals必须重写hashcode。因此，在这之前，建议你先对Set实现元素唯一性有足够的了解。</p>
 <h3 id="3-1-跑不掉的Set唯一性检查"><a href="#3-1-跑不掉的Set唯一性检查" class="headerlink" title="3.1 跑不掉的Set唯一性检查"></a>3.1 跑不掉的Set唯一性检查</h3><p>Java中的Collection有两类，一类是List，一类是Set。List内的元素是有序的，元素可以重复。Set元素无序，但元素不可重复。要想保证元素不重复，<strong>我们最首先能想到的最简单粗暴的方式就是用Object.equals方法</strong>。但若每增加一个元素就检查一次，那么当元素很多时，后添加到集合中的元素比较的次数就非常多了。也就是说若集合中已有1000个元素，那么第1001个元素加入集合时，它就要调用1000次equals方法。这显然会大大降低效率。于是为了提升Set的唯一性检查的效率，Java引入了了哈希表的特性，这就是Set的一个实现：<strong>HashSet</strong>。当然，你也可能会想到用别的方法进行唯一性检查，比如二叉排序树将比较的时间复杂度降到 lgn？好巧不巧，Java团队也想到了！除了用Hash思想来提高Set唯一性检查的性能外，Java官方也想到了引入二叉排序树的思想，于是又有了Set的另一个实现：<strong>TreeSet</strong>。但是我们今天先只看HashSet，对于TreeSet，你只需要清楚，这两个只不过是为了提高Set唯一性检查的性能采用了不同的手段，又导致了不同的特性。</p>
 <p>​            </p>
 <p>当Set接收一个元素时根据，会对该对象的hashCode方法产生的结果（以后称其为hash值）进行进一步的hash()运算，这个hash才是真正的寻位hash，寻位hash的结果将决定这个对象存储到哪一个链表上，再在这个链表里调用equeals方法来检查唯一性，这样就大幅降低了插入元素时需要进行比较的次数：从全局元素比较变成只跟一条拉链上的元素比较。</p>
@@ -349,7 +356,7 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/Java%E5%9F%BA%E7%A1%80/" rel="tag"><i class="fa fa-tag"></i> Java基础</a>
+              <a href="/tags/Java/" rel="tag"><i class="fa fa-tag"></i> Java</a>
           </div>
 
         
@@ -361,8 +368,8 @@
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/05/03/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%A4%96%E9%83%A8%E6%8E%92%E5%BA%8F%E5%B7%A5%E5%85%B7/" rel="next" title="大规模数据外部排序工具">
-                  大规模数据外部排序工具 <i class="fa fa-chevron-right"></i>
+                <a href="/2021/05/03/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%A4%96%E9%83%A8%E6%8E%92%E5%BA%8F%E5%B7%A5%E5%85%B7/" rel="next" title="实现硬盘排序-N路归并排序">
+                  实现硬盘排序-N路归并排序 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>

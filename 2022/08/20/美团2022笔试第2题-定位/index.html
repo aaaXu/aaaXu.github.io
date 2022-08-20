@@ -23,23 +23,21 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"www.xulixuli.ltd","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
-<meta name="description" content="引言：创建对象在语言层面只是一个ｎｅｗ关键字。但是在虚拟机的内部却要做很多的操作，比如在堆中分配内存、设置对象头等等。本文简要介绍了java对象在内存中的布局以及对象的创建。">
+<meta name="description" content="简介： 关键词：美团笔试；2022；探测器；定位；棋盘；DFS；">
 <meta property="og:type" content="article">
-<meta property="og:title" content="JVM对象内存布局">
-<meta property="og:url" content="https://www.xulixuli.ltd/2021/03/15/jvm%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%BF%87%E7%A8%8B/index.html">
+<meta property="og:title" content="美团2022笔试第2题-定位">
+<meta property="og:url" content="https://www.xulixuli.ltd/2022/08/20/%E7%BE%8E%E5%9B%A22022%E7%AC%94%E8%AF%95%E7%AC%AC2%E9%A2%98-%E5%AE%9A%E4%BD%8D/index.html">
 <meta property="og:site_name" content="阿旭的博客">
-<meta property="og:description" content="引言：创建对象在语言层面只是一个ｎｅｗ关键字。但是在虚拟机的内部却要做很多的操作，比如在堆中分配内存、设置对象头等等。本文简要介绍了java对象在内存中的布局以及对象的创建。">
+<meta property="og:description" content="简介： 关键词：美团笔试；2022；探测器；定位；棋盘；DFS；">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://z3.ax1x.com/2021/07/02/RcHQNd.md.png">
-<meta property="article:published_time" content="2021-03-15T12:03:35.000Z">
-<meta property="article:modified_time" content="2022-07-31T08:26:48.429Z">
+<meta property="article:published_time" content="2022-08-20T05:23:46.000Z">
+<meta property="article:modified_time" content="2022-08-20T05:27:23.999Z">
 <meta property="article:author" content="阿旭">
-<meta property="article:tag" content="Java">
+<meta property="article:tag" content="算法题">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://z3.ax1x.com/2021/07/02/RcHQNd.md.png">
 
 
-<link rel="canonical" href="https://www.xulixuli.ltd/2021/03/15/jvm%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%BF%87%E7%A8%8B/">
+<link rel="canonical" href="https://www.xulixuli.ltd/2022/08/20/%E7%BE%8E%E5%9B%A22022%E7%AC%94%E8%AF%95%E7%AC%AC2%E9%A2%98-%E5%AE%9A%E4%BD%8D/">
 
 
 <script class="page-configurations">
@@ -51,7 +49,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>JVM对象内存布局 | 阿旭的博客</title>
+<title>美团2022笔试第2题-定位 | 阿旭的博客</title>
   
 
   <script>
@@ -187,18 +185,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">9</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">1</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -245,7 +243,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://www.xulixuli.ltd/2021/03/15/jvm%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%BF%87%E7%A8%8B/">
+    <link itemprop="mainEntityOfPage" href="https://www.xulixuli.ltd/2022/08/20/%E7%BE%8E%E5%9B%A22022%E7%AC%94%E8%AF%95%E7%AC%AC2%E9%A2%98-%E5%AE%9A%E4%BD%8D/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/touxiang.jpg">
@@ -258,7 +256,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          JVM对象内存布局
+          美团2022笔试第2题-定位
         </h1>
 
         <div class="post-meta-container">
@@ -269,16 +267,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2021-03-15 20:03:35" itemprop="dateCreated datePublished" datetime="2021-03-15T20:03:35+08:00">2021-03-15</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
-        </span>
+      <time title="创建时间：2022-08-20 13:23:46" itemprop="dateCreated datePublished" datetime="2022-08-20T13:23:46+08:00">2022-08-20</time>
     </span>
 
   
@@ -298,8 +287,8 @@
       <span class="post-meta-item-text">Changyan：</span>
     
     
-      <a title="changyan" href="/2021/03/15/jvm%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%BF%87%E7%A8%8B/#SOHUCS" itemprop="discussionUrl">
-        <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2021/03/15/jvm创建对象的过程/" itemprop="commentCount"></span>
+      <a title="changyan" href="/2022/08/20/%E7%BE%8E%E5%9B%A22022%E7%AC%94%E8%AF%95%E7%AC%AC2%E9%A2%98-%E5%AE%9A%E4%BD%8D/#SOHUCS" itemprop="discussionUrl">
+        <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2022/08/20/美团2022笔试第2题-定位/" itemprop="commentCount"></span>
       </a>
     
   </span>
@@ -314,22 +303,18 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p><strong>引言：</strong>创建对象在语言层面只是一个<code>ｎｅｗ</code>关键字。但是在虚拟机的内部却要做很多的操作，比如在堆中分配内存、设置对象头等等。本文简要介绍了java对象在内存中的布局以及对象的创建。</p>
+        <p><strong>简介：</strong></p>
+<p><strong>关键词：</strong>美团笔试；2022；探测器；定位；棋盘；DFS；</p>
 <span id="more"></span>
 
-<h2 id="对象内存布局"><a href="#对象内存布局" class="headerlink" title="对象内存布局"></a>对象内存布局</h2><p>一个对象本身的内在结构需要一种描述方式，这个描述信息是以字节码的方法存储在方法区中的。<br>Class 本身就是一个对象，都以 KB 为单位，如果 new Integer() 为了表示一个数据就占用KB级别的内存就有点不值了，下面讲解 JVM 是如何做的。</p>
-<p>为了表示对象的属性、方法等信息，不得不需要结构描述。Hotspot VM 使用对象头部的一个指针指向 Class 区域的方式来找到对象的 Class 描述，以及内部的方法、属性入口。如下图所示：</p>
-<p><a href=""><img src="https://z3.ax1x.com/2021/07/02/RcHQNd.md.png" alt="RcHQNd.md.png"></a></p>
-<h2 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h2><p><strong>当虚拟机遇到一条New指令时：会进行如下步骤</strong></p>
-<ol>
-<li>检查指令的参数（即工作中我们New的对象），能否在常量池中找到它的符号引用。</li>
-<li>如果存在，检查符号引用代表的类是否被加载、解析、初始化过。（如果没有则执行类的加载—–相关加载过程参考《<a target="_blank" rel="noopener" href="https://www.cnblogs.com/chenpt/p/9777367.html">Jvm类的加载机制</a>》）。</li>
-<li>加载通过后，虚拟机将为新生对象分配内存。（所需内存大小在类加载完成后便可确定）</li>
-</ol>
-<p>两种内存分配的方式：</p>
-<p>　　<strong>指针碰撞</strong>：假设Java堆中的内存是绝对规整的，所有用过的内存都放在一边，空闲的内存放在另一边。中间放着一个指针作为分界点的指示器，分配内存就仅仅是把指针往空闲空间那边挪动一段与对象大小相等的距离。这种方式则属于指针碰撞。</p>
-<p>　　<strong>空闲列表</strong>：如果堆中的内存并不是规整的，已使用的内存和空闲内存相互交错，显然无法使用指针碰撞。虚拟机就必须维护一个列表，记录哪些内存是可用的，在分配的时候从列表中找到一块足够大的空间划分给对象实例，并更新记录表上的数据。这种方式属于空闲列表。</p>
-<p>具体选择哪种分配方式由Java堆决定，而Java堆是否规整，则有GC收集器决定。因此使用Serial、ParNew等带Compact过程的收集器时，系统采用的分配算法是指针碰撞。而使用CMS这种基于Mark-Sweep算法的收集器时，通常采用的空闲列表。</p>
+
+
+
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 结果的x坐标</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> resx = Integer.MAX_VALUE;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 结果的y坐标</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> resy = Integer.MAX_VALUE;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        <span class="comment">// 测试数据.注意题目给的坐标范围是[1, n]，这里将其左移至[0,n-1]</span></span><br><span class="line">        <span class="comment">// 测试数据的坐标系从0开始，为[0,n-1]，n为题目给的棋盘大小</span></span><br><span class="line">        <span class="keyword">int</span> n = <span class="number">4</span>;</span><br><span class="line">        <span class="comment">// 三个探测器 target 为  1,1，</span></span><br><span class="line">        <span class="keyword">int</span> x1 = <span class="number">0</span>, y1 = <span class="number">0</span>, d1 = <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">int</span> x2 = <span class="number">3</span>, y2 = <span class="number">0</span>, d2 = <span class="number">3</span>;</span><br><span class="line">        <span class="keyword">int</span> x3 = <span class="number">2</span>, y3 = <span class="number">3</span>, d3 = <span class="number">3</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 该表为三次dfs共享使用</span></span><br><span class="line">        <span class="keyword">int</span>[][] counts = <span class="keyword">new</span> <span class="keyword">int</span>[n][n];</span><br><span class="line">        <span class="comment">// 通过初始值为-1来避免target与探测器重合</span></span><br><span class="line">        counts[x1][y1] = -<span class="number">1</span>;</span><br><span class="line">        counts[x2][y2] = -<span class="number">1</span>;</span><br><span class="line">        counts[x3][y3] = -<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 每次 new 一个全为false的boolean[n][n]</span></span><br><span class="line">        foo(x1, y1, d1, counts, <span class="keyword">new</span> <span class="keyword">boolean</span>[n][n]);</span><br><span class="line">        foo(x2, y2, d2, counts, <span class="keyword">new</span> <span class="keyword">boolean</span>[n][n]);</span><br><span class="line">        foo(x3, y3, d3, counts, <span class="keyword">new</span> <span class="keyword">boolean</span>[n][n]);</span><br><span class="line"></span><br><span class="line">        System.out.println(resx + <span class="string">&quot; &quot;</span> + resy);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 从坐标 xy 开始dfs，标记</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">foo</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y, <span class="keyword">int</span> distance, <span class="keyword">int</span>[][] counts, <span class="keyword">boolean</span>[][] visited)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 越界</span></span><br><span class="line">        <span class="keyword">if</span> (x &lt; <span class="number">0</span> || x &gt;= counts.length || y &lt; <span class="number">0</span> || y &gt;= counts.length) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 已被访问过</span></span><br><span class="line">        <span class="keyword">if</span> (visited[x][y]) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 距离超了</span></span><br><span class="line">        <span class="keyword">if</span> (distance &lt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 距离刚刚好，给该坐标点的counts值+1，表示该点被一个探测器标定。</span></span><br><span class="line">        <span class="comment">// 当值增到3，说明被3个探测器标定，该点就是备选结果。</span></span><br><span class="line">        <span class="keyword">if</span> (distance == <span class="number">0</span>) &#123;</span><br><span class="line">            counts[x][y] ++;</span><br><span class="line">            <span class="keyword">if</span> (counts[x][y] == <span class="number">3</span>) &#123;</span><br><span class="line">                getMinPoint(x, y);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        visited[x][y] = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">        foo(x-<span class="number">1</span>, y, distance - <span class="number">1</span>, counts, visited);</span><br><span class="line">        foo(x+<span class="number">1</span>, y, distance - <span class="number">1</span>, counts, visited);</span><br><span class="line">        foo(x, y-<span class="number">1</span>, distance - <span class="number">1</span>, counts, visited);</span><br><span class="line">        foo(x, y+<span class="number">1</span>, distance - <span class="number">1</span>, counts, visited);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">getMinPoint</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (x &lt; resx || y &lt; resy) &#123;</span><br><span class="line">            resx = x;</span><br><span class="line">            resy = y;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 
     </div>
 
@@ -338,18 +323,18 @@
     
 
     <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%AE%97%E6%B3%95%E9%A2%98/" rel="tag"><i class="fa fa-tag"></i> 算法题</a>
+          </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/05/03/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%A4%96%E9%83%A8%E6%8E%92%E5%BA%8F%E5%B7%A5%E5%85%B7/" rel="prev" title="大规模数据外部排序工具">
-                  <i class="fa fa-chevron-left"></i> 大规模数据外部排序工具
-                </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/03/10/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/" rel="next" title="JVM运行时数据区">
-                  JVM运行时数据区 <i class="fa fa-chevron-right"></i>
+                <a href="/2022/05/18/caffeine/" rel="next" title="详解本地缓存技术 Caffeine">
+                  详解本地缓存技术 Caffeine <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
